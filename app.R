@@ -121,6 +121,21 @@ extractArcsinhTemp <- function(values){
     return(as.list((1:length(markers))[selected]))
 }
 
+
+#eventually these should be preselected by whatever markers are not technical markers and have not been used for gating
+#currently it just deselects the standard background / DNA / Beads / .. markers
+extractTSNEMarkers <- function(values){
+    markers <- names(values$markerMapping)
+    selected <- rep(FALSE,length(markers))
+    selected[grep('::',markers)] <- TRUE
+    selected[grep('_Barcode$',markers)] <- FALSE
+    selected[grep('_Viability$',markers)] <- FALSE
+    selected[grep('Beads$',markers)] <- FALSE
+    selected[grep('_DNA[12]$',markers)] <- FALSE
+    return(as.list((1:length(markers))[selected]))
+}
+
+
 #function that extracts the markers, makes a map and handles the proper ordering
 extractMarkerPanel <- function(values){
     chan <- pData(parameters(values$gatingPanels[[1]]@flowFrame))[,c('name','desc')]
@@ -171,17 +186,6 @@ insertGatingPanels <- function(values){
             
         )
     }
-    insertUI(
-        selector = "#AboveVisneSpace",
-        where = "afterBegin",
-        ui =  tags$div(id='ImposeColorSelector',
-                       selectInput("select_tsne_impose", 
-                                   label = "Select marker to impose",
-                                   choices = c('',names(values$markerMapping)),
-                                   selected = '')
-        )
-        
-    )
 }
 
 plot_colorByDensity <- function(x1,x2,
@@ -216,6 +220,7 @@ server <- function(input, output, session) {
                              tsne_current_marker='',
                              tsne_sample=NULL,
                              tsne_col='',
+                             tSNE_markers=NULL, 
                              tsne_arcsintransform=TRUE)
     
     #file loading
@@ -223,6 +228,7 @@ server <- function(input, output, session) {
         #clean up
         removeUI(selector = "#GatingPanelInterface")
         removeUI(selector = "#MarkerPanelInterface")
+        removeUI(selector = "#ImposeColorSelector")
         values$verbatimOutput <- ''
 
         #generate the underlying object that holds all information for the parent gates
@@ -237,6 +243,7 @@ server <- function(input, output, session) {
         #clean up
         removeUI(selector = "#GatingPanelInterface")
         removeUI(selector = "#MarkerPanelInterface")
+        removeUI(selector = "#ImposeColorSelector")
         values$verbatimOutput <- ''
         
         #generate the underlying object that holds all information for the parent gates
@@ -294,6 +301,10 @@ server <- function(input, output, session) {
                 checkboxInput("tsne_arcsin", 
                               label='Run t-SNE using arcsinh transformed values', 
                               value = FALSE),
+                checkboxGroupInput("tSNEMarkers", label = NULL, 
+                                   choiceNames = as.list(names(values$markerMapping)),
+                                   choiceValues = as.list(1:length(values$markerMapping)),
+                                   selected = extractTSNEMarkers(values)),
                 easyClose = TRUE,
                 footer = tagList(
                     modalButton("Cancel"),
@@ -303,9 +314,11 @@ server <- function(input, output, session) {
     
     #if run tsne button has been pushed
     observeEvent(input$tsne_ok_button, {
+        #remember whether to arcsintransform
         values$tsne_arcsintransform <- input$tsne_arcsin
+        #remember which markers were selected
+        values$tSNE_markers <- input$tSNEMarkers
         removeModal()
-
         
         #get the values
         mat <- exprs(values$gatingPanels[[1]]@flowFrame)
@@ -317,6 +330,9 @@ server <- function(input, output, session) {
             }
         }
         
+        #use only the markers that were selected
+        mat <- mat[,values$markerMapping[as.numeric(values$tSNE_markers)]]
+        
         #downsampling
         set.seed(123) 
         values$tsne_sample <- sample(1:nrow(mat), input$DownSample)
@@ -327,6 +343,17 @@ server <- function(input, output, session) {
                                                perplexity = input$tSNE_perplexity,
                                                theta = input$tSNE_theta,
                                                verbose = TRUE)
+        insertUI(
+            selector = "#AboveVisneSpace",
+            where = "afterBegin",
+            ui =  tags$div(id='ImposeColorSelector',
+                           selectInput("select_tsne_impose", 
+                                       label = "Select marker to impose",
+                                       choices = c('',names(values$markerMapping)),
+                                       selected = '')
+            )
+            
+        )
     })
     
     #display the visne panel
