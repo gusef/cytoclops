@@ -300,7 +300,7 @@ server <- function(input, output, session) {
                 title = "Running t-SNE",
                 checkboxInput("tsne_arcsin", 
                               label='Run t-SNE using arcsinh transformed values', 
-                              value = FALSE),
+                              value = TRUE),
                 checkboxGroupInput("tSNEMarkers", label = NULL, 
                                    choiceNames = as.list(names(values$markerMapping)),
                                    choiceValues = as.list(1:length(values$markerMapping)),
@@ -314,6 +314,7 @@ server <- function(input, output, session) {
     
     #if run tsne button has been pushed
     observeEvent(input$tsne_ok_button, {
+        removeUI(selector = "#ImposeColorSelector")
         #remember whether to arcsintransform
         values$tsne_arcsintransform <- input$tsne_arcsin
         #remember which markers were selected
