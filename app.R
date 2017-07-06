@@ -8,7 +8,7 @@ require(flowCore)
 require(flowVS)
 
 GatingPanel <- setClass("GatingPanel",
-                        slots = c(flowFrame = "flowFrame",
+                        slots = c(indices = "numeric",
                                   children = "list",
                                   parent = "GatingPanel",
                                   gates= "list",
@@ -23,28 +23,37 @@ ui <- navbarPage(title = "Cytoclops",
                  ),
                  tabPanel(title = "Display panel",
                           fluidRow(
-                              column(6,
+                              column(2,
+                                  h3('')     
+                              ),
+                              column(4,
                                   selectInput("PlotType", label = "Plot type:", 
                                               choices = list("Density plot" = "density", 
                                                              "Smooth Scatter" = "smooth", 
                                                              "Regular Scatter" = "regular"), 
                                               selected = "density")
                               ),
-                              column(6,
+                              column(4,
                                    tags$div(id='AboveVisneSpace')   
                               )
                           ),
                           fluidRow(
-                              column(6,
-                                  h3("Gating Panel"),
-                                  plotOutput("GatingPanel",
-                                             height="100%",
-                                             click = "gate_click",
-                                             brush = brushOpts(
-                                                 id = "GateBrush"
-                                             ))
+                              column(2,
+                                     h4('List of gates'),
+                                     tags$div(id='gatingList'),
+                                     radioButtons('gates', label = NULL,
+                                                  c(Parent='1'))
                               ),
-                              column(6,
+                              column(4,
+                                     h3("Gating Panel"),
+                                     plotOutput("GatingPanel",
+                                                height="100%",
+                                                click = "gate_click",
+                                                brush = brushOpts(
+                                                     id = "GateBrush"
+                                    ))
+                              ),
+                              column(4,
                                   h3("bh-SNE Panel"),
                                   plotOutput("FirstVisnePanel",
                                              height="100%",
@@ -138,9 +147,9 @@ extractTSNEMarkers <- function(values){
 
 #function that extracts the markers, makes a map and handles the proper ordering
 extractMarkerPanel <- function(values){
-    chan <- pData(parameters(values$gatingPanels[[1]]@flowFrame))[,c('name','desc')]
+    chan <- pData(parameters(values$flowFrame))[,c('name','desc')]
     chan <- paste(chan$name,chan$desc,sep='::')
-    vals <- colnames(values$gatingPanels[[1]]@flowFrame) 
+    vals <- colnames(values$flowFrame) 
     names(vals) <- sub('::NA','',chan)
     #Katja's custom order (might be extended)
     actual <- grep('..[0-9]+',vals)
@@ -213,7 +222,9 @@ server <- function(input, output, session) {
     options(shiny.maxRequestSize=500*1024^2)
     
     #reactive values
-    values <- reactiveValues(gatingPanels=list(),
+    values <- reactiveValues(gatingPanels=NULL,
+                             flowFrame = NULL,
+                             currentGatingPanel=NULL,
                              channels=NULL,
                              markerMapping=NULL,
                              verbatimOutput='',
@@ -232,8 +243,10 @@ server <- function(input, output, session) {
         values$verbatimOutput <- ''
 
         #generate the underlying object that holds all information for the parent gates
-        values$gatingPanels[[1]] <- GatingPanel()
-        values$gatingPanels[[1]]@flowFrame <- read.FCS(input$fcsFile$datapath)
+        values$gatingPanels <- GatingPanel()
+        values$flowFrame <- read.FCS(input$fcsFile$datapath)
+        values$gatingPanels@indices <- 1:nrow(values$flowFrame)
+        values$currentGatingPanel <-  values$gatingPanels
         values$markerMapping <- extractMarkerPanel(values)
         insertGatingPanels(values)
     })
@@ -247,17 +260,20 @@ server <- function(input, output, session) {
         values$verbatimOutput <- ''
         
         #generate the underlying object that holds all information for the parent gates
-        values$gatingPanels[[1]] <- GatingPanel()
-        values$gatingPanels[[1]]@flowFrame <- read.FCS('test.fcs')
+        values$gatingPanels <- GatingPanel()
+        values$flowFrame <- read.FCS('test.fcs')
+        values$gatingPanels@indices <- 1:nrow(values$flowFrame)
+        values$currentGatingPanel <- values$gatingPanels
+        
         values$markerMapping <- extractMarkerPanel(values)
         insertGatingPanels(values)
     })
     
     #simple gating panel
     output$GatingPanel <- renderPlot({
-        if (!is.null(input$markerMapping) && length(values$gatingPanels) == 0)
+        if (is.null(values$currentGatingPanel))
             return(NULL)
-        mat <- exprs(values$gatingPanels[[1]]@flowFrame)
+        mat <- exprs(values$flowFrame[values$currentGatingPanel@indices,])
         xVal <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
         yVal <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
         
@@ -289,10 +305,9 @@ server <- function(input, output, session) {
     #if you fiddle around with the markers, and the tSNE was done using arcsinh transformed data it gets dropped
     observeEvent(input$ArcSinhSelect, {
         if (values$tsne_arcsintransform){
-            values$gatingPanels[[1]]@tsne<-list()
+            values$currentGatingPanel@tsne<-list()
         }
     })
-
 
     #tun the bh-SNE when the button is pressed
     observeEvent(input$RunTSNE, {
@@ -322,7 +337,7 @@ server <- function(input, output, session) {
         removeModal()
         
         #get the values
-        mat <- exprs(values$gatingPanels[[1]]@flowFrame)
+        mat <- exprs(values$flowFrame[values$currentGatingPanel@indices,])
         if (values$tsne_arcsintransform){
             map <- values$markerMapping
             selected_markers <- names(map)[as.numeric(input$ArcSinhSelect)]
@@ -333,17 +348,17 @@ server <- function(input, output, session) {
         
         #use only the markers that were selected
         mat <- mat[,values$markerMapping[as.numeric(values$tSNE_markers)]]
-        
+
         #downsampling
         set.seed(123) 
         values$tsne_sample <- sample(1:nrow(mat), input$DownSample)
         mat <- mat[values$tsne_sample,]
         values$tsne_col <- 'black'
-        values$gatingPanels[[1]]@tsne <- Rtsne(mat, 
-                                               max_iter = input$tSNE_iter,
-                                               perplexity = input$tSNE_perplexity,
-                                               theta = input$tSNE_theta,
-                                               verbose = TRUE)
+        values$currentGatingPanel@tsne <- Rtsne(mat, 
+                                          max_iter = input$tSNE_iter,
+                                          perplexity = input$tSNE_perplexity,
+                                          theta = input$tSNE_theta,
+                                          verbose = TRUE)
         insertUI(
             selector = "#AboveVisneSpace",
             where = "afterBegin",
@@ -359,9 +374,9 @@ server <- function(input, output, session) {
     
     #display the visne panel
     output$FirstVisnePanel <- renderPlot({
-        if (length(values$gatingPanels) == 0 || length(values$gatingPanels[[1]]@tsne)==0)
+        if (is.null(values$currentGatingPanel) || length(values$currentGatingPanel@tsne)==0)
             return(NULL)
-        plot(values$gatingPanels[[1]]@tsne$Y,
+        plot(values$currentGatingPanel@tsne$Y,
              col=values$tsne_col,
              xlab='tSNE1',
              ylab='tSNE2',
@@ -381,7 +396,7 @@ server <- function(input, output, session) {
         
         #get the values of the selected marker
         map <- values$markerMapping
-        mat <- data.frame(exprs(values$gatingPanels[[1]]@flowFrame))
+        mat <- data.frame(exprs(values$flowFrame[values$currentGatingPanel@indices,]))
         vals <- mat[,map[input$select_tsne_impose]]
         
         #do an arcsinh transform is the box is checked
@@ -398,14 +413,14 @@ server <- function(input, output, session) {
     
     #color the t-SNE plot accoring to the selected gate
     observeEvent(input$GateBrush, {
-        if (length(values$gatingPanels) == 0 || length(values$gatingPanels[[1]]@tsne)==0)
+        if (is.null(values$currentGatingPanel) || length(values$currentGatingPanel@tsne)==0)
             return(NULL)
         
         #set the select box to zero because the coloring is done by the brush
         values$tsne_current_marker <- ''
         
         #there are 4 combinations: both arcsinh space, both normal space, one normal the other arcsinh and vice versa
-        mat <- exprs(values$gatingPanels[[1]]@flowFrame)
+        mat <- exprs(values$flowFrame[values$currentGatingPanel@indices,])
         if (values$tsne_arcsintransform){
             map <- values$markerMapping
             selected_markers <- names(map)[as.numeric(input$ArcSinhSelect)]
@@ -415,7 +430,7 @@ server <- function(input, output, session) {
         }
         
         #make sure the dots are transformed if the panel is transformed
-        mat <- data.frame(exprs(values$gatingPanels[[1]]@flowFrame))
+        mat <- data.frame(exprs(values$flowFrame[values$currentGatingPanel@indices,]))
         mat[,values$markerMapping[input$Select_x_channels]] <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
         mat[,values$markerMapping[input$Select_y_channels]] <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
         
@@ -433,7 +448,7 @@ server <- function(input, output, session) {
     
     #gating on the first panel
     observeEvent(input$GateButton, {
-        mat <- data.frame(exprs(values$gatingPanels[[1]]@flowFrame))
+        mat <- data.frame(exprs(values$flowFrame[values$currentGatingPanel@indices,]))
         res <- brushedPoints(mat, 
                              xvar=values$markerMapping[input$Select_x_channels],
                              yvar=values$markerMapping[input$Select_y_channels],
