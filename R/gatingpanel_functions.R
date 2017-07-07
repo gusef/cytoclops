@@ -1,5 +1,4 @@
-
-
+require(flowCore)
 GatingPanel <- setClass("GatingPanel",
                         slots = c(indices = "numeric",
                                   gate_name = "character",

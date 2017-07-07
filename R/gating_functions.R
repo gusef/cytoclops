@@ -1,6 +1,3 @@
-
-
-
 #traverses the gating tree and creates a list
 replace_gating_list <- function(input, values){
     removeUI(selector = "#RadioGates")

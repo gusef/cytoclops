@@ -1,12 +1,8 @@
 rm(list=ls())
 gc()
+require('shiny')
 
-library(shiny)
-require(shinyBS)
-require(Rtsne)
-require(flowCore)
-require(flowVS)
-
+# Source isn't necessary when generating a package
 source('misc.R')
 source('gatingpanel_functions.R')
 source('gating_functions.R')
@@ -37,7 +33,7 @@ server <- function(input, output, session) {
     
     #file loading - testset
     observeEvent(input$LoadTest,{
-        instantiate_panels(input, values, 'test.fcs') 
+        instantiate_panels(input, values, '../inst/extdata/test.fcs') 
     })
     
     #file loading
@@ -123,6 +119,4 @@ server <- function(input, output, session) {
     observeEvent(input$save_ok_button, {
         press_ok_gating(input, values)
     })
-    
-    
 }

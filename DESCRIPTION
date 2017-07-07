@@ -1,0 +1,15 @@
+Package: cytoclops
+Title: A workspace for cytometry data
+Version: 0.1.0
+Authors@R: person("Daniel", "Gusenleitner", email = "Daniel_Gusenleitner@dfci.harvard.edu", role = c("aut", "cre"))
+Description: Visualize cytometry data. Gate and use machine learning to 
+             apply gating strategies.
+Depends: R (>= 3.4.0)
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Import: shinyBS,
+        flowVS,
+        flowCore,
+        Rtsne
+RoxygenNote: 6.0.1

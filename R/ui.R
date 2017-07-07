@@ -1,4 +1,4 @@
-
+require(shinyBS)
 ui <- navbarPage(title = "Cytoclops",
                  tabPanel(title = "File loading",
                           actionButton("LoadTest", "Load test set"),
