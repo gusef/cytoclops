@@ -13,7 +13,7 @@ GatingPanel <- setClass("GatingPanel",
 insertGatingPanels <- function(values){
     #insert the gating and visne panel + additional buttons and inputs
     insertUI(
-        selector = "#GatingPanel",
+        selector = "#PolygonButton",
         where = "beforeBegin",
         ui =  tags$div(id='AboveGatingPanelInterface',
                        fluidRow(
@@ -103,8 +103,6 @@ loadGating <- function(input, values, file){
 }
 
 
-
-
 plot_gates <- function(input, values){
     if (is.null(values$gatingPanels) || is.null(values$currentID) || is.null(input$Select_x_channels))
         return(NULL)
@@ -112,6 +110,7 @@ plot_gates <- function(input, values){
     xVal <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
     yVal <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
     
+    par(mar=c(5.1,4.1,1.1,2.1))
     if (input$PlotType=='density'){
         plot_colorByDensity(xVal,
                             yVal,
@@ -123,8 +122,12 @@ plot_gates <- function(input, values){
                       yVal, 
                       xlab=input$Select_x_channels,
                       ylab=input$Select_y_channels,
-                      colramp = colorRampPalette(c("white", 'black')),
+                      colramp = colorRampPalette(c("#FFFFFF","#000099", 
+                                                   "#00FEFF", "#45FE4F",
+                                                   "#FCFF00", "#FF9400", 
+                                                   "#FF3100")),
                       pch = ".")
+
     }else{
         plot(xVal,
              yVal,
@@ -135,14 +138,8 @@ plot_gates <- function(input, values){
     }
 }
 
-gate_brush <- function(input, values){
-    
-    if (is.null(values$gatingPanels) || is.null(values$currentID))
-        return(NULL)
-    
-    #set the select box to zero because the coloring is done by the brush
-    values$tsne_current_marker <- ''
-    
+
+get_current_tsne <- function(input, values){
     #there are 4 combinations: both arcsinh space, both normal space, one normal the other arcsinh and vice versa
     mat <- exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,])
     if (values$tsne_arcsintransform){
@@ -157,6 +154,23 @@ gate_brush <- function(input, values){
     mat <- data.frame(exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,]))
     mat[,values$markerMapping[input$Select_x_channels]] <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
     mat[,values$markerMapping[input$Select_y_channels]] <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
+    return(mat)
+}
+
+gate_brush <- function(input, values){
+    
+    if (is.null(values$gatingPanels))
+        return(NULL)
+    
+    #if the polygon drawing is active don't allow regular brushing
+    if (!is.null(values$scaled_points))
+        return(NULL)
+    
+    #set the select box to zero because the coloring is done by the brush
+    values$tsne_current_marker <- ''
+    
+    #get current set of markers
+    mat <- get_current_tsne(input, values)
     
     #select based on the drawn window
     values$selectedPoints <- brushedPoints(mat, 
@@ -164,7 +178,6 @@ gate_brush <- function(input, values){
                                            yvar=values$markerMapping[input$Select_y_channels],
                                            input$GateBrush, 
                                            allRows = TRUE)
-    
     if (length(values$gatingPanels[[values$currentID]]@tsne)!=0){
         values$tsne_col <- rep('grey',input$DownSample)
         values$tsne_col[values$selectedPoints$selected_[values$gatingPanels[[values$currentID]]@tsne_sample]] <- 'black'

@@ -10,6 +10,8 @@ ui <- navbarPage(title = "Cytoclops",
                                     accept = c(".rds",".RDS"))
                  ),
                  tabPanel(title = "Display panel",
+                          shinyjs::useShinyjs(),
+                          shinyjs::extendShinyjs(script = 'www/overlay.js'),
                           #change the bsmodal with to 95% of the screed
                           tags$head(tags$style(HTML('
                                                     .modal-lg {
@@ -30,6 +32,9 @@ ui <- navbarPage(title = "Cytoclops",
                               ),
                               column(4,
                                      h3("Gating Panel", align = "center"),
+                                     actionButton('PolygonButton','',icon = icon("pencil",lib = "glyphicon")),
+                                     actionButton('PolygonViewButton','',icon = icon("eye-open",lib = "glyphicon")),
+                                     actionButton('PolygonResetButton','',icon = icon("remove",lib = "glyphicon")),
                                      plotOutput("GatingPanel",
                                                 height="100%",
                                                 click = "gate_click",
@@ -53,10 +58,10 @@ ui <- navbarPage(title = "Cytoclops",
                               ),
                               column(4,
                                      selectInput("PlotType", label = "Plot type:", 
-                                                 choices = list("Density plot" = "density", 
-                                                                "Smooth Scatter" = "smooth", 
+                                                 choices = list("Smooth Scatter" = "smooth",
+                                                                "Density plot" = "density",  
                                                                 "Regular Scatter" = "regular"), 
-                                                 selected = "density")
+                                                 selected = "smooth")
                               ),
                               column(4,
                                      tags$div(id='AboveVisneSpace')   

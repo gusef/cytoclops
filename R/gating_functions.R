@@ -20,9 +20,12 @@ replace_gating_list <- function(input, values){
 }
 
 gating_modal <- function(input, values, session){
-    if(sum(values$selectedPoints$selected_)>0){
-        #Popup to enter the name
-        showModal(modalDialog(
+    if((!is.null(values$scaled_points) && 
+        length(values$scaled_points$x) > 2) || 
+        sum(values$selectedPoints$selected_)>0){
+         
+       #Popup to enter the name
+       showModal(modalDialog(
             title = "New gate",
             textInput("newGateName", label = h3("Enter name for new gate"), value = "New gate"),
             easyClose = TRUE,
@@ -37,10 +40,15 @@ gating_modal <- function(input, values, session){
 }
 
 press_gating_ok <- function(input, values){
-    
+    #if in polygon mode get the selected from the polygon else from brush
+    if(!is.null(values$scaled_points)){
+        selected <- get_polygon_selected(input, values)
+    }else{
+        selected <- values$selectedPoints$selected_
+    }
     #Add a new gatingPanel object
     newGating <- GatingPanel()
-    newGating@indices <- values$gatingPanels[[values$currentID]]@indices[values$selectedPoints$selected_]
+    newGating@indices <- values$gatingPanels[[values$currentID]]@indices[selected]
     newGating@gate_name <- input$newGateName
     parent <- names(values$gatingPanels)[values$currentID]
     newGating@parent <- parent

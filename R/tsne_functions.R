@@ -83,11 +83,6 @@ add_tsne_controls <- function(input, values){
 } 
 
 show_tsne_modal <- function(input, values){
-    print('markermaps')
-    print(values$markerMapping)
-    print('len_gating_panel')
-    print(length(values$gatingPanels))
-    
     showModal(modalDialog(
         title = "Running t-SNE",
         checkboxInput("tsne_arcsin", 

@@ -7,6 +7,7 @@ source('misc.R')
 source('gatingpanel_functions.R')
 source('gating_functions.R')
 source('tsne_functions.R')
+source('polygon.R')
 
 
 server <- function(input, output, session) {
@@ -24,7 +25,8 @@ server <- function(input, output, session) {
                              tsne_col='',
                              tSNE_markers=NULL, 
                              tsne_arcsintransform=TRUE,
-                             verbose='')
+                             verbose='',
+                             scaled_points=NULL)
     
     #file loading
     observeEvent(input$fcsFile,{ 
@@ -47,6 +49,25 @@ server <- function(input, output, session) {
         plot_gates(input, values)
     },height = function() {
         min(700,session$clientData$output_GatingPanel_width)
+    })
+    
+    #update the polygon points is a new batch is drawn
+    observeEvent(input$PolygonPoints,{ 
+        update_polygon_points(input, values)       
+    })
+    
+    observeEvent(input$PolygonViewButton,{
+        update_tsne_by_polygon(input, values)
+    })
+    
+    observeEvent(input$PolygonButton, {
+        js$initPolyDraw(id="GatingPanel")
+    })
+    
+    observeEvent(input$PolygonResetButton, {
+        values$scaled_points <- NULL
+        js$resetPolyDraw(id="GatingPanel")
+
     })
     
     #if you fiddle around with the markers, and the tSNE was done using arcsinh transformed data it gets dropped
