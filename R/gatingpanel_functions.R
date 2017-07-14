@@ -53,7 +53,7 @@ insertGatingPanels <- function(values){
     }
 }
 
-instantiate_panels <- function(input, values, file){
+instantiate_panels <- function(input, values, file, session){
     #clean up
     removeUI(selector = "#AboveGatingPanelInterface")
     removeUI(selector = "#BelowGatingPanelInterface")
@@ -78,10 +78,10 @@ instantiate_panels <- function(input, values, file){
     
     #add new UI elements
     insertGatingPanels(values)
-    replace_gating_list(input,values)
+    replace_gating_list(input,values,session)
 }
 
-loadGating <- function(input, values, file){
+loadGating <- function(input, values, file, session){
     #clean up
     removeUI(selector = "#AboveGatingPanelInterface")
     removeUI(selector = "#BelowGatingPanelInterface")
@@ -99,7 +99,7 @@ loadGating <- function(input, values, file){
 
     #add new UI elements
     insertGatingPanels(values)
-    replace_gating_list(input,values)
+    replace_gating_list(input,values,session)
 }
 
 

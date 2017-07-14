@@ -1,5 +1,8 @@
 require(shinyBS)
 require(shinythemes)
+require(V8)
+require(data.table)
+require(jsonlite)
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  
@@ -31,8 +34,11 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               column(2,
                                      h4('List of gates'),
                                      tags$div(id='gatingList'),
-                                     radioButtons('RadioGates', label = NULL,
-                                                  c(All='G1'))
+                                     treeTableInput('TreeGates',
+                                                    df=data.table::rbindlist(list(list(id='G1',text="All"))),
+                                                    selected='G1'
+                                     )
+                                     
                               ),
                               column(4,
                                      h3("Gating Panel", align = "center"),
@@ -78,7 +84,8 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               )
                           ),
                           verbatimTextOutput('Verbose')
-                          ),
+                          
+                 ),
                  tabPanel(title = "Markers",
                           tags$div(id='CurrentPanelTab',
                                    h4("Select Markers that should be arcsinh transformed for gating:")
