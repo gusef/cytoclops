@@ -54,6 +54,10 @@ add_tsne_controls <- function(input, values){
     insertUI(
         selector = "#tSNEPanel",
         where = "beforeBegin",
+        ui = actionButton("ShowAllMarkersButton", "Show all"))
+    insertUI(
+        selector = "#ShowAllMarkersButton",
+        where = "beforeBegin",
         ui =  tags$div(id='ImposeColorSelector',
                        fluidRow(
                            column(12,
@@ -77,10 +81,7 @@ add_tsne_controls <- function(input, values){
                                           )))))
         
     )
-   insertUI(
-      selector = "#tSNEPanel",
-      where = "beforeBegin",
-      ui = actionButton("ShowAllMarkersButton", "Show all"))
+
 } 
 
 show_tsne_modal <- function(input, values){
