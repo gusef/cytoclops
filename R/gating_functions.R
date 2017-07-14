@@ -3,9 +3,8 @@ replace_gating_list <- function(input, values, session){
     #get the names of all gates
     gate_names <- sapply(values$gatingPanels,function(x)x@gate_name)
     names(gate_names) <- NULL
-#    gate_names <- paste0(gsub('[^_]','',names(values$gatingPanels)),gate_names)
-    dat1 <- getDataTable(gate_names,names(values$gatingPanels))
-    updateTreeTableInput(session,'TreeGates',dat1,selected='G1')
+    dat <- getDataTable(gate_names,names(values$gatingPanels))
+    updateTreeTableInput(session,'TreeGates',dat,selected='G1')
 }
 
 gating_modal <- function(input, values, session){
@@ -59,6 +58,7 @@ setNewChild <- function(input, values, parent){
                                    y=c(br$ymin,br$ymax,br$ymax,br$ymin))
     }
     values$gatingPanels[[values$currentID]]@children[[index]] <- child
+    #give the children IDs so we can easily select them afterwards
     names(values$gatingPanels[[values$currentID]]@children) <- sapply(values$gatingPanels[[values$currentID]]@children,function(x)x$id)
     return(kid_name)
 }
