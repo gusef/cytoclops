@@ -128,11 +128,6 @@ select_child <- function(session, input, values){
         return(NULL)
     }
     child <- values$gatingPanels[[values$currentID]]@children[[input$SelectChild]]
-    print(values$gatingPanels[[values$currentID]]@children)
-    print("Child")
-    print(child)
-    print("SELECTION")
-    print(input$SelectChild)
     updateSelectInput(session,'Select_x_channels', 
                       choices = names(values$markerMapping),
                       selected = child$xmarker)
