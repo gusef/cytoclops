@@ -76,6 +76,11 @@ server <- function(input, output, session) {
         change_arcsinselect(input, values)
     })
     
+    observeEvent(input$SelectChild, {
+        select_child(session, input, values)
+    })
+    
+    
     #tun the bh-SNE when the button is pressed
     observeEvent(input$RunTSNE, {
         show_tsne_modal(input, values)
@@ -125,7 +130,7 @@ server <- function(input, output, session) {
     
     #set the currentID to the newly selected gate
     observeEvent(input$TreeGates,{
-        tree_gate_click(input, values)
+        tree_gate_click(session, input, values)
     })
     
     output$Verbose <- renderPrint({

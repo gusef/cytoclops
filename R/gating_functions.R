@@ -3,9 +3,8 @@ replace_gating_list <- function(input, values, session){
     #get the names of all gates
     gate_names <- sapply(values$gatingPanels,function(x)x@gate_name)
     names(gate_names) <- NULL
-    gate_names <- paste0(gsub('[^_]','',names(values$gatingPanels)),gate_names)
+#    gate_names <- paste0(gsub('[^_]','',names(values$gatingPanels)),gate_names)
     dat1 <- getDataTable(gate_names,names(values$gatingPanels))
-    #print(dat1)
     updateTreeTableInput(session,'TreeGates',dat1,selected='G1')
 }
 
@@ -28,6 +27,42 @@ gating_modal <- function(input, values, session){
                     content = "No cells selected in the gating panel.", append = FALSE)
     }
 }
+
+setNewChild <- function(input, values, parent){
+    #Derive child name and set it in children of the parent 
+    kids <- values$gatingPanels[[values$currentID]]@children
+    index <- length(kids)+1
+    
+    #generate new identifier
+    if (index == 1){
+        kid_name <- paste(parent,1,sep='_')
+    }else{
+        #if there are already children just increment the last one - otherwise this might lead to duplicates
+        kid_name <- paste(parent,as.numeric(sub('.+_','',kids[[index-1]]$id))+1,sep='_')
+    }
+    
+    #capture all relevant information for the child
+    child <- list()
+    child$name <- input$newGateName
+    child$id <- kid_name
+    child$xmarker <- input$Select_x_channels
+    child$ymarker <- input$Select_y_channels
+    
+    #get the points either from the polygon
+    if (!is.null(values$scaled_points)){
+        child$points <- data.frame(x=values$scaled_points$x,
+                                   y=values$scaled_points$y)
+        #or from the brush
+    }else{
+        br <- input$GateBrush
+        child$points <- data.frame(x=c(br$xmin,br$xmin,br$xmax,br$xmax),
+                                   y=c(br$ymin,br$ymax,br$ymax,br$ymin))
+    }
+    values$gatingPanels[[values$currentID]]@children[[index]] <- child
+    names(values$gatingPanels[[values$currentID]]@children) <- sapply(values$gatingPanels[[values$currentID]]@children,function(x)x$id)
+    return(kid_name)
+}
+
 
 # From a vector of names and values (which are essentially IDs) return a suitable object for treeTable
 getDataTable <- function(choiceNames,choiceValues) {
@@ -60,11 +95,7 @@ press_gating_ok <- function(input, values, session){
     parent <- names(values$gatingPanels)[values$currentID]
     newGating@parent <- parent
     
-    #Derive child name and set it in children of the parent 
-    kids <- values$gatingPanels[[values$currentID]]@children
-    index <- length(kids)+1
-    kid_name <- paste(parent,index,sep='_')
-    values$gatingPanels[[values$currentID]]@children <- c(kids,kid_name)
+    kid_name <- setNewChild(input, values, parent)
     
     #add the new element
     new_id <- values$currentID + 1
@@ -92,17 +123,50 @@ press_gating_ok <- function(input, values, session){
     
 }
 
-tree_gate_click <- function(input, values){
+select_child <- function(session, input, values){
+    if (is.null(values$gatingPanels) || length(values$gatingPanels[[values$currentID]]@children)==0){
+        return(NULL)
+    }
+    child <- values$gatingPanels[[values$currentID]]@children[[input$SelectChild]]
+    print(values$gatingPanels[[values$currentID]]@children)
+    print("Child")
+    print(child)
+    print("SELECTION")
+    print(input$SelectChild)
+    updateSelectInput(session,'Select_x_channels', 
+                      choices = names(values$markerMapping),
+                      selected = child$xmarker)
+    updateSelectInput(session,'Select_y_channels', 
+                      choices = names(values$markerMapping),
+                      selected = child$ymarker)
+    
+}
+
+
+tree_gate_click <- function(session, input, values){
   if (is.null(values$gatingPanels) || is.null(values$currentID))
     return(NULL)
   values$currentID <- grep(paste0('^',input$TreeGates$value,'$'),names(values$gatingPanels))
-  print(values$currentID)
+
+  current <- values$gatingPanels[[values$currentID]]
+  #toggle children input selectize depending on whether there are children
+  if(length(current@children)>0){
+      #update the child selector
+      selection <- lapply(current@children,function(x)x$id)
+      names(selection) <- sapply(current@children,function(x)x$name)
+      updateSelectInput(session,'SelectChild', 
+                        choices = selection)
+      shinyjs::show(id = "SelectChild", anim = TRUE) 
+  }else{
+      shinyjs::hide(id = "SelectChild", anim = TRUE) 
+  }
+  
   #remove all the tSNE UI
   removeUI(selector = "#ImposeColorSelector") 
   removeUI(selector = "#ShowAllMarkersButton") 
   
   #if t-SNE was run however add the controls
-  if (length(values$gatingPanels[[values$currentID]]@tsne)>0){
+  if (length(current@tsne)>0){
     add_tsne_controls(input, values)
     shinyjs::show(id = "tSNEPanel", anim = TRUE)
   }else{

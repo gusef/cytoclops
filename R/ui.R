@@ -1,8 +1,9 @@
 require(shinyBS)
 require(shinythemes)
 require(V8)
-require(data.table)
+require(data.table) 
 require(jsonlite)
+source('tree-table-input.R')
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  
@@ -52,7 +53,11 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                                                     id = "GateBrush",
                                                     fill = "#FF1414", 
                                                     stroke = "#FF1414"
-                                                ))
+                                                )),
+                                     shinyjs::hidden(
+                                         selectInput("SelectChild",
+                                                     label = NULL, 
+                                                     choices = NULL))
                               ),
                               
                               column(4,align='center',
@@ -72,7 +77,6 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               ),
                               column(4,
                                      selectInput("PlotType",
-                                                 selectize = TRUE,
                                                  label = "Plot type:", 
                                                  choices = list("Smooth Scatter" = "smooth",
                                                                 "Density plot" = "density",  

@@ -10,7 +10,7 @@ treeTableInput <- function(inputID,df=NULL,selected=NULL) {
     ),
     shiny::singleton(
       shiny::tags$head(
-        shiny::tags$link(rel="stylesheet",type="text/css",href="vakata-jstree-a6a0d0d/dist/themes/default-dark/style.css")
+        shiny::tags$link(rel="stylesheet",type="text/css",href="vakata-jstree-a6a0d0d/dist/themes/default/style.css")
       )
     ),
     shiny::singleton(
