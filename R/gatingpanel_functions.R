@@ -2,7 +2,7 @@ require(flowCore)
 GatingPanel <- setClass("GatingPanel",
                         slots = c(indices = "numeric",
                                   gate_name = "character",
-                                  children = "character",
+                                  children = "list",
                                   parent = "character",
                                   gates= "list",
                                   tsne = "list",
@@ -103,6 +103,31 @@ loadGating <- function(input, values, file, session){
 }
 
 
+#draw the actual polygon
+drawPolygon <- function(x, y, idx, cols){
+    #need to also add the line to the starting point
+    x <- c(x,x[1])
+    y <- c(y,y[1])
+    lines(x,y,col=cols[idx],lwd=1.5)
+    return(idx+1 %% length(cols))
+}
+
+#draw the polygon on top of the plot if it's the right markers
+draw_children <- function(input, values){
+    cols <- c("#FF0099FF","#CC00FFFF","#00FFFFFF","#555555")
+    idx <- 1
+    for (child in values$gatingPanels[[values$currentID]]@children){
+        #if the markers are exactly the same
+        if ((child$xmarker == input$Select_x_channels) && (child$ymarker == input$Select_y_channels)){
+            idx <- drawPolygon(child$points$x, child$points$y, idx, cols)
+            #if the markers are reversed
+        }else if((child$ymarker == input$Select_x_channels) && (child$xmarker == input$Select_y_channels)){
+            idx <- drawPolygon(child$points$y, child$points$x, idx, cols)
+        }
+    }
+}
+
+
 plot_gates <- function(input, values){
     if (is.null(values$gatingPanels) || is.null(values$currentID) || is.null(input$Select_x_channels))
         return(NULL)
@@ -137,6 +162,7 @@ plot_gates <- function(input, values){
              pch=20,
              cex=input$graphics_cex)    
     }
+    draw_children(input, values)
 }
 
 

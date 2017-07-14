@@ -60,18 +60,14 @@ press_gating_ok <- function(input, values, session){
     parent <- names(values$gatingPanels)[values$currentID]
     newGating@parent <- parent
     
-    #Derive child name and set it in children of the parent 
-    kids <- values$gatingPanels[[values$currentID]]@children
-    index <- length(kids)+1
-    kid_name <- paste(parent,index,sep='_')
-    values$gatingPanels[[values$currentID]]@children <- c(kids,kid_name)
+    #set the child of the current 
+    kid_name <- setNewChild(input, values, parent)
     
     #add the new element
     new_id <- values$currentID + 1
     if(new_id > length(values$gatingPanels)){
         #if it is inserted at the end of the list
         values$gatingPanels <- c(values$gatingPanels,newGating)
-        
     }else{
         #if it is inserted in the middle of the list
         values$gatingPanels <- c(values$gatingPanels[1:(new_id-1)],
@@ -79,6 +75,7 @@ press_gating_ok <- function(input, values, session){
                                  values$gatingPanels[new_id:length(values$gatingPanels)])
     }
     names(values$gatingPanels)[new_id] <- kid_name
+
     #set the currentID to the new gate
     values$currentID <- new_id
     #remove the gating modal
