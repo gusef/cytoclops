@@ -46,14 +46,15 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                                      actionButton('PolygonButton','',icon = icon("pencil",lib = "glyphicon")),
                                      actionButton('PolygonViewButton','',icon = icon("eye-open",lib = "glyphicon")),
                                      actionButton('PolygonResetButton','',icon = icon("remove",lib = "glyphicon")),
-                                     plotOutput("GatingPanel",
-                                                height="100%",
-                                                click = "gate_click",
-                                                brush = brushOpts(
-                                                    id = "GateBrush",
-                                                    fill = "#FF1414", 
-                                                    stroke = "#FF1414"
-                                                )),
+                                     shinyjs::hidden(
+                                         plotOutput("GatingPanel",
+                                                    height="100%",
+                                                    click = "gate_click",
+                                                    brush = brushOpts(
+                                                        id = "GateBrush",
+                                                        fill = "#FF1414", 
+                                                        stroke = "#FF1414"
+                                                    ))),
                                      shinyjs::hidden(
                                          selectInput("SelectChild",
                                                      label = NULL, 

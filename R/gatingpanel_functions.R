@@ -11,6 +11,7 @@ GatingPanel <- setClass("GatingPanel",
 
 
 insertGatingPanels <- function(values){
+    shinyjs::show(id = "GatingPanel", anim = TRUE)
     #insert the gating and visne panel + additional buttons and inputs
     insertUI(
         selector = "#PolygonButton",
