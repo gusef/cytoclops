@@ -3,6 +3,7 @@ gc()
 require('shiny')
 require('shinyjs')
 require('sp')
+require('shinythemes')
 
 # Source isn't necessary when generating a package
 source('misc.R')

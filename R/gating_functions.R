@@ -39,6 +39,39 @@ gating_modal <- function(input, values, session){
     }
 }
 
+setNewChild <- function(input, values, parent){
+    #Derive child name and set it in children of the parent 
+    kids <- values$gatingPanels[[values$currentID]]@children
+    index <- length(kids)+1
+    
+    #generate new identifier
+    if (index == 1){
+        kid_name <- paste(parent,1,sep='_')
+    }else{
+        #if there are already children just increment the last one - otherwise this might lead to duplicates
+        kid_name <- paste(parent,as.numeric(sub('.+_','',x))+1,sep='_')
+    }
+
+    #capture all relevant information for the child
+    child <- list()
+    child$name <- kid_name
+    child$xmarker <- input$Select_x_channels
+    child$ymarker <- input$Select_y_channels
+    
+    #get the points either from the polygon
+    if (!is.null(values$scaled_points)){
+        child$points <- data.frame(x=values$scaled_points$x,
+                                   y=values$scaled_points$y)
+    #or from the brush
+    }else{
+        br <- input$GateBrush
+        child$points <- data.frame(x=c(br$xmin,br$xmin,br$xmax,br$xmax),
+                                   y=c(br$ymin,br$ymax,br$ymax,br$ymin))
+    }
+    values$gatingPanels[[values$currentID]]@children[[index]] <- child
+    return(kid_name)
+}
+
 press_gating_ok <- function(input, values){
     #if in polygon mode get the selected from the polygon else from brush
     if(!is.null(values$scaled_points)){
@@ -53,18 +86,14 @@ press_gating_ok <- function(input, values){
     parent <- names(values$gatingPanels)[values$currentID]
     newGating@parent <- parent
     
-    #Derive child name and set it in children of the parent 
-    kids <- values$gatingPanels[[values$currentID]]@children
-    index <- length(kids)+1
-    kid_name <- paste(parent,index,sep='_')
-    values$gatingPanels[[values$currentID]]@children <- c(kids,kid_name)
+    #set the child of the current 
+    kid_name <- setNewChild(input, values, parent)
     
     #add the new element
     new_id <- values$currentID + 1
     if(new_id > length(values$gatingPanels)){
         #if it is inserted at the end of the list
         values$gatingPanels <- c(values$gatingPanels,newGating)
-        
     }else{
         #if it is inserted in the middle of the list
         values$gatingPanels <- c(values$gatingPanels[1:(new_id-1)],
@@ -72,6 +101,7 @@ press_gating_ok <- function(input, values){
                                  values$gatingPanels[new_id:length(values$gatingPanels)])
     }
     names(values$gatingPanels)[new_id] <- kid_name
+
     #set the currentID to the new gate
     values$currentID <- new_id
     #remove the gating modal
