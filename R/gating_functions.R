@@ -79,6 +79,7 @@ press_gating_ok <- function(input, values){
     #remove all tSNE related UI
     removeUI(selector = "#ImposeColorSelector")
     removeUI(selector = "#ShowAllMarkersButton") 
+    shinyjs::hide(id = "tSNEPanel", anim = TRUE)
     #replace the old gating list on the side
     replace_gating_list(input, values)
     
@@ -96,6 +97,9 @@ radio_gate_click <- function(input, values){
     #if t-SNE was run however add the controls
     if (length(values$gatingPanels[[values$currentID]]@tsne)>0){
         add_tsne_controls(input, values)
+        shinyjs::show(id = "tSNEPanel", anim = TRUE)
+    }else{
+        shinyjs::hide(id = "tSNEPanel", anim = TRUE)
     }
 }
 

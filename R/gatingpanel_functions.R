@@ -122,6 +122,7 @@ plot_gates <- function(input, values){
                       yVal, 
                       xlab=input$Select_x_channels,
                       ylab=input$Select_y_channels,
+                      transformation = function(x) x^.5,
                       colramp = colorRampPalette(c("#FFFFFF","#000099", 
                                                    "#00FEFF", "#45FE4F",
                                                    "#FCFF00", "#FF9400", 

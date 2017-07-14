@@ -50,7 +50,7 @@ map2color<-function(x,pal,limits=NULL){
 
 #adds all the tsne control inputs
 add_tsne_controls <- function(input, values){
-    shinyjs::toggle(id = "tSNEPanel", anim = TRUE)
+    shinyjs::show(id = "tSNEPanel", anim = TRUE)
     insertUI(
         selector = "#tSNEPanel",
         where = "beforeBegin",
@@ -125,7 +125,11 @@ tsne_ok_button_pressed <- function(input, values){
     
     #downsampling
     set.seed(123) 
-    values$gatingPanels[[values$currentID]]@tsne_sample <- sample(1:nrow(mat), input$DownSample)
+    if (input$DownSample < nrow(mat)){
+        values$gatingPanels[[values$currentID]]@tsne_sample <- sample(1:nrow(mat), input$DownSample)
+    }else{
+        values$gatingPanels[[values$currentID]]@tsne_sample <- 1:nrow(mat)
+    }
     mat <- mat[values$gatingPanels[[values$currentID]]@tsne_sample,]
     values$tsne_col <- 'black'
     
