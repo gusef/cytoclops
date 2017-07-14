@@ -32,17 +32,17 @@ server <- function(input, output, session) {
     
     #file loading
     observeEvent(input$fcsFile,{ 
-        instantiate_panels(input, values, input$fcsFile$datapath)
+        instantiate_panels(input, values, input$fcsFile$datapath, session)
     })
     
     #file loading - testset
     observeEvent(input$LoadTest,{
-        instantiate_panels(input, values, '../inst/extdata/test.fcs') 
+        instantiate_panels(input, values, '../inst/extdata/test.fcs', session) 
     })
     
     #file loading
     observeEvent(input$rdsFile,{ 
-        loadGating(input, values, input$rdsFile$datapath)
+        loadGating(input, values, input$rdsFile$datapath,session)
     })
     
     #simple gating panel
@@ -120,12 +120,12 @@ server <- function(input, output, session) {
     
     #Pressing the OK button in the gating modal
     observeEvent(input$gate_ok_button, {
-        press_gating_ok(input, values)
+        press_gating_ok(input, values, session)
     })
     
     #set the currentID to the newly selected gate
-    observeEvent(input$RadioGates,{
-        radio_gate_click(input, values)
+    observeEvent(input$TreeGates,{
+        tree_gate_click(input, values)
     })
     
     output$Verbose <- renderPrint({
