@@ -1,6 +1,8 @@
 rm(list=ls())
 gc()
 require('shiny')
+require('shinyjs')
+require('sp')
 
 # Source isn't necessary when generating a package
 source('misc.R')
