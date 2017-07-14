@@ -45,7 +45,6 @@ server <- function(input, output, session) {
         loadGating(input, values, input$rdsFile$datapath)
     })
     
-    
     #simple gating panel
     output$GatingPanel <- renderPlot({
         plot_gates(input, values)

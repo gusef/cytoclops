@@ -1,6 +1,10 @@
 require(shinyBS)
-ui <- navbarPage(title = "Cytoclops",
+require(shinythemes)
+ui <- navbarPage(theme = shinytheme("darkly"),
+                 title = "Cytoclops",
+                 
                  tabPanel(title = "File loading",
+                          includeCSS("www/selectize.css"),
                           actionButton("LoadTest", "Load test set"),
                           h3('Load raw input'),
                           fileInput("fcsFile", "Choose raw .FCS file",
@@ -44,12 +48,13 @@ ui <- navbarPage(title = "Cytoclops",
                               ),
                               column(4,align='center',
                                      h3("bh-SNE Panel", align = "center"),
-                                     plotOutput("tSNEPanel",
-                                                height="100%",
-                                                click = "visne_click",
-                                                brush = brushOpts(
-                                                    id = "visne_brush"
-                                                )) 
+                                     shinyjs::hidden(
+                                         plotOutput("tSNEPanel",
+                                                    height="100%",
+                                                    click = "visne_click",
+                                                    brush = brushOpts(
+                                                        id = "visne_brush"
+                                                    ))) 
                               )
                           ),
                           fluidRow(
@@ -57,7 +62,8 @@ ui <- navbarPage(title = "Cytoclops",
                                      actionButton("SaveStateButton", "Save Gatings")
                               ),
                               column(4,
-                                     selectInput("PlotType", label = "Plot type:", 
+                                     selectInput("PlotType",
+                                                 label = "Plot type:", 
                                                  choices = list("Smooth Scatter" = "smooth",
                                                                 "Density plot" = "density",  
                                                                 "Regular Scatter" = "regular"), 

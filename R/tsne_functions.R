@@ -50,10 +50,7 @@ map2color<-function(x,pal,limits=NULL){
 
 #adds all the tsne control inputs
 add_tsne_controls <- function(input, values){
-    insertUI(
-        selector = "#tSNEPanel",
-        where = "afterEnd",
-        ui = actionButton("ShowAllMarkersButton", "Show all"))
+    shinyjs::toggle(id = "tSNEPanel", anim = TRUE)
     insertUI(
         selector = "#tSNEPanel",
         where = "beforeBegin",
@@ -80,6 +77,10 @@ add_tsne_controls <- function(input, values){
                                           )))))
         
     )
+   insertUI(
+      selector = "#tSNEPanel",
+      where = "beforeBegin",
+      ui = actionButton("ShowAllMarkersButton", "Show all"))
 } 
 
 show_tsne_modal <- function(input, values){

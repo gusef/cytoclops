@@ -239,7 +239,7 @@ shinyjs.initPolyDraw = function(params) {
         canvas.addEventListener('mouseup', stopdrag, true);
 
     }
-}
+};
 
 var dotLineLength = function (x, y, x0, y0, x1, y1, o) {
     function lineLength(x, y, x0, y0) {
