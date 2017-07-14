@@ -110,7 +110,7 @@ plot_gates <- function(input, values){
     xVal <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
     yVal <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
     
-    par(mar=c(5.1,4.1,1.1,2.1))
+    par(mar=c(4.1,4.1,1.1,1.1))
     if (input$PlotType=='density'){
         plot_colorByDensity(xVal,
                             yVal,

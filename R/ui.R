@@ -43,9 +43,12 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                                                 height="100%",
                                                 click = "gate_click",
                                                 brush = brushOpts(
-                                                    id = "GateBrush"
+                                                    id = "GateBrush",
+                                                    fill = "#FF1414", 
+                                                    stroke = "#FF1414"
                                                 ))
                               ),
+                              
                               column(4,align='center',
                                      h3("bh-SNE Panel", align = "center"),
                                      shinyjs::hidden(
@@ -63,6 +66,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               ),
                               column(4,
                                      selectInput("PlotType",
+                                                 selectize = TRUE,
                                                  label = "Plot type:", 
                                                  choices = list("Smooth Scatter" = "smooth",
                                                                 "Density plot" = "density",  

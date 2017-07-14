@@ -112,6 +112,9 @@ press_save_gating <- function(input, values){
 }
 
 #save the current state
+###################################################
+#TODO: this needs to be updated with the latest ver
+######################################################
 press_ok_gating <- function(input, values){
     filename <- input$newFileName
     filename <- paste0(sub('\\.[Rr][Dd][Ss]','',filename),'.RDS')
