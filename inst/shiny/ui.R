@@ -1,14 +1,17 @@
+require(shiny)
 require(shinyBS)
-require(shinythemes)
-require(V8)
-require(data.table) 
-require(jsonlite)
 require(CIOShiny)
+require(jsonlite)
+require(shinythemes)
+require(htmltools)
+require(sp)
+require(shinyjs)
+require(V8)
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  
                  tabPanel(title = "File loading",
-                          includeCSS("www/selectize.css"),
+                          includeCSS(system.file('www','selectize.css',package='cytoclops')),
                           actionButton("LoadTest", "Load test set"),
                           h3('Load raw input'),
                           fileInput("fcsFile", "Choose raw .FCS file",
@@ -19,7 +22,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                  ),
                  tabPanel(title = "Display panel",
                           shinyjs::useShinyjs(),
-                          shinyjs::extendShinyjs(script = 'www/overlay.js'),
+                          shinyjs::extendShinyjs(script = system.file('www','overlay.js',package='cytoclops')),
                           #change the bsmodal with to 95% of the screed
                           tags$head(tags$style(HTML('
                                                     .modal-lg {

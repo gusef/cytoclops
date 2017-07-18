@@ -1,18 +1,5 @@
 rm(list=ls())
 gc()
-require('shiny')
-require('shinyjs')
-require('sp')
-require(CIOShiny)
-
-# Source isn't necessary when generating a package
-source('misc.R')
-source('gatingpanel_functions.R')
-source('gating_functions.R')
-source('tsne_functions.R')
-source('polygon.R')
-
-
 server <- function(input, output, session) {
     options(shiny.maxRequestSize=500*1024^2)
     
@@ -38,7 +25,7 @@ server <- function(input, output, session) {
     
     #file loading - testset
     observeEvent(input$LoadTest,{
-        instantiate_panels(input, values, '../inst/extdata/test.fcs', session) 
+        instantiate_panels(input, values, system.file('extdata','test.fcs',package='cytoclops'), session) 
     })
     
     #file loading

@@ -8,9 +8,17 @@ Depends: R (>= 3.4.0)
 License: MIT
 Encoding: UTF-8
 LazyData: true
-Import: shinyBS,
+Import: shiny,
+        shinyBS,
         flowVS,
         flowCore,
         Rtsne,
-        CIOShiny
+        CIOShiny,
+        shinythemes,
+        V8,
+        data.table,
+        shinyjs,
+        sp,
+        htmltools,
+        jsonlite
 RoxygenNote: 6.0.1
