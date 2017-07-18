@@ -3,7 +3,7 @@ require(shinythemes)
 require(V8)
 require(data.table) 
 require(jsonlite)
-source('tree-table-input.R')
+require(CIOShiny)
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  
@@ -35,7 +35,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               column(2,
                                      h4('List of gates'),
                                      tags$div(id='gatingList'),
-                                     treeTableInput('TreeGates',
+                                     jsTreeSelectorInput('TreeGates',
                                                     df=data.table::rbindlist(list(list(id='G1',text="All"))),
                                                     selected='G1'
                                      )

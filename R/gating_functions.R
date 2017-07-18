@@ -4,7 +4,7 @@ replace_gating_list <- function(input, values, session){
     gate_names <- sapply(values$gatingPanels,function(x)x@gate_name)
     names(gate_names) <- NULL
     dat <- getDataTable(gate_names,names(values$gatingPanels))
-    updateTreeTableInput(session,'TreeGates',dat,selected='G1')
+    updatejsTreeSelectorInput(session,'TreeGates',dat,selected='G1')
 }
 
 gating_modal <- function(input, values, session){

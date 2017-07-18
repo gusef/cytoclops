@@ -11,5 +11,6 @@ LazyData: true
 Import: shinyBS,
         flowVS,
         flowCore,
-        Rtsne
+        Rtsne,
+        CIOShiny
 RoxygenNote: 6.0.1
