@@ -1,3 +1,19 @@
+require(shiny)
+require(shinyBS)
+require(CIOShiny)
+require(jsonlite)
+require(shinythemes)
+require(htmltools)
+require(sp)
+require(shinyjs)
+require(V8)
+
+source('gating_functions.R')
+source('gatingpanel_functions.R')
+source('misc.R')
+source('polygon.R')
+source('tsne_functions.R')
+
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  
