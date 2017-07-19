@@ -1,12 +1,3 @@
-require(shiny)
-require(shinyBS)
-require(CIOShiny)
-require(jsonlite)
-require(shinythemes)
-require(htmltools)
-require(sp)
-require(shinyjs)
-require(V8)
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  

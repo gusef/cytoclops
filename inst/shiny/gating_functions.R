@@ -137,23 +137,22 @@ select_child <- function(session, input, values){
     
 }
 
-
 tree_gate_click <- function(session, input, values){
   if (is.null(values$gatingPanels) || is.null(values$currentID))
     return(NULL)
   values$currentID <- grep(paste0('^',input$TreeGates$value,'$'),names(values$gatingPanels))
-
+  
   current <- values$gatingPanels[[values$currentID]]
   #toggle children input selectize depending on whether there are children
   if(length(current@children)>0){
-      #update the child selector
-      selection <- lapply(current@children,function(x)x$id)
-      names(selection) <- sapply(current@children,function(x)x$name)
-      updateSelectInput(session,'SelectChild', 
-                        choices = selection)
-      shinyjs::show(id = "SelectChild", anim = TRUE) 
+    #update the child selector
+    selection <- lapply(current@children,function(x)x$id)
+    names(selection) <- sapply(current@children,function(x)x$name)
+    updateSelectInput(session,'SelectChild', 
+                      choices = selection)
+    shinyjs::show(id = "SelectChild", anim = TRUE) 
   }else{
-      shinyjs::hide(id = "SelectChild", anim = TRUE) 
+    shinyjs::hide(id = "SelectChild", anim = TRUE) 
   }
   
   #remove all the tSNE UI

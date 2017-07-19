@@ -35,6 +35,7 @@ extractArcsinhTemp <- function(values){
 }
 
 #function that extracts the markers, makes a map and handles the proper ordering
+
 extractMarkerPanel <- function(input, values){
     chan <- pData(parameters(values$flowFrame))[,c('name','desc')]
     chan <- paste(chan$name,chan$desc,sep='::')
