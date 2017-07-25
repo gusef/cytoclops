@@ -65,6 +65,7 @@ server <- function(input, output, session) {
         change_arcsinselect(input, values)
     })
     
+    #dropdown that selects the appropriate child
     observeEvent(input$SelectChild, {
         select_child(session, input, values)
     })
@@ -125,15 +126,27 @@ server <- function(input, output, session) {
     output$Verbose <- renderPrint({
         values$verbose
     })
+    
 
-    #Pressing the save gating button
-    observeEvent(input$SaveStateButton, {
-        press_save_gating(input, values)
-    })
-
-    #Pressing the save gating button
-    observeEvent(input$save_ok_button, {
-        press_ok_gating(input, values)
-    })
+    output$SaveStateButton <- downloadHandler(
+        filename = function() {
+            paste("Gatings_", Sys.Date(), ".RDS", sep="")
+        },
+        content = function(file) {
+            temp <- list(flowFrame = values$flowFrame,
+                         gatingPanels=values$gatingPanels,
+                         currentID=values$currentID,
+                         channels=values$channels,
+                         markerMapping=values$markerMapping,
+                         selectedPoints=values$selectedPoints,
+                         verbatimOutput=values$verbatimOutput,
+                         tsne_current_marker=values$tsne_current_marker,
+                         tsne_col=values$tsne_col,
+                         tSNE_markers=values$tSNE_markers, 
+                         tsne_arcsintransform=values$tsne_arcsintransform,
+                         verbose=values$verbose)
+            saveRDS(temp,file=file)},
+        contentType='RDS')
+    
 }
 

@@ -84,7 +84,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                           ),
                           fluidRow(
                               column(2,
-                                     actionButton("SaveStateButton", "Save Gatings")
+                                     downloadButton("SaveStateButton", "Save Gatings")
                               ),
                               column(4,
                                      selectInput("PlotType",

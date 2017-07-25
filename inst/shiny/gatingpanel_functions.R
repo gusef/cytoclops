@@ -117,6 +117,7 @@ draw_children <- function(input, values){
     cols <- c("#FF0099FF","#CC00FFFF","#00FFFFFF","#555555")
     idx <- 1
     for (child in values$gatingPanels[[values$currentID]]@children){
+       print(child)
         #if the markers are exactly the same
         if ((child$xmarker == input$Select_x_channels) && (child$ymarker == input$Select_y_channels)){
             idx <- drawPolygon(child$points$x, child$points$y, idx, cols)
