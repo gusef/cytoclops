@@ -56,6 +56,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                                      actionButton('PolygonButton','',icon = icon("pencil",lib = "glyphicon")),
                                      actionButton('PolygonViewButton','',icon = icon("eye-open",lib = "glyphicon")),
                                      actionButton('PolygonResetButton','',icon = icon("remove",lib = "glyphicon")),
+                                     downloadButton("SaveGate", ""),
                                      shinyjs::hidden(
                                          plotOutput("GatingPanel",
                                                     height="100%",
@@ -73,6 +74,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               
                               column(4,align='center',
                                      h3("bh-SNE Panel", align = "center"),
+                                     downloadButton("SavetSNE", ""),
                                      shinyjs::hidden(
                                          plotOutput("tSNEPanel",
                                                     height="100%",
@@ -84,7 +86,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                           ),
                           fluidRow(
                               column(2,
-                                     downloadButton("SaveStateButton", "Save Gatings")
+                                     downloadButton("SaveStateButton", "Save gating")
                               ),
                               column(4,
                                      selectInput("PlotType",

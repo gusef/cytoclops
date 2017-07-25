@@ -52,7 +52,7 @@ map2color<-function(x,pal,limits=NULL){
 add_tsne_controls <- function(input, values){
     shinyjs::show(id = "tSNEPanel", anim = TRUE)
     insertUI(
-        selector = "#tSNEPanel",
+        selector = "#SavetSNE",
         where = "beforeBegin",
         ui = actionButton("ShowAllMarkersButton", "Show all"))
     insertUI(

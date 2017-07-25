@@ -60,6 +60,17 @@ server <- function(input, output, session) {
 
     })
     
+    #saves a pdf of the current gate
+    output$SaveGate <-    downloadHandler(
+        filename = function() {
+            paste("Gating_", Sys.Date(), ".pdf", sep="")
+        },
+        content = function(file) {
+            pdf(file)
+            plot_gates(input, values)
+            dev.off()},
+        contentType='pdf')
+   
     #if you fiddle around with the markers, and the tSNE was done using arcsinh transformed data it gets dropped
     observeEvent(input$ArcSinhSelect, {
         change_arcsinselect(input, values)
@@ -70,7 +81,6 @@ server <- function(input, output, session) {
         select_child(session, input, values)
     })
     
-    
     #tun the bh-SNE when the button is pressed
     observeEvent(input$RunTSNE, {
         show_tsne_modal(input, values)
@@ -80,7 +90,23 @@ server <- function(input, output, session) {
     observeEvent(input$tsne_ok_button, {
         tsne_ok_button_pressed(input, values)
     })
-    
+
+    #saves a pdf of the current tSNE plot
+    output$SavetSNE <-    downloadHandler(
+        filename = function() {
+            paste("tSNE_", Sys.Date(), ".pdf", sep="")
+        },
+        content = function(file) {
+            if (!is.null(values$gatingPanels) && 
+                !is.null(values$currentID) && 
+                length(values$gatingPanels[[values$currentID]]@tsne)>0){
+                    pdf(file)
+                    plot_tsne_panel(input, values)
+                    dev.off()
+            }
+        },
+        contentType='pdf')
+        
     #display the visne panel
     output$tSNEPanel <- renderPlot({
         plot_tsne_panel(input, values)
@@ -127,8 +153,8 @@ server <- function(input, output, session) {
         values$verbose
     })
     
-
-    output$SaveStateButton <- downloadHandler(
+    #save the current state
+    output$SaveStateButton <-    downloadHandler(
         filename = function() {
             paste("Gatings_", Sys.Date(), ".RDS", sep="")
         },
@@ -144,9 +170,10 @@ server <- function(input, output, session) {
                          tsne_col=values$tsne_col,
                          tSNE_markers=values$tSNE_markers, 
                          tsne_arcsintransform=values$tsne_arcsintransform,
-                         verbose=values$verbose)
+                         verbose=values$verbose,
+                         scaled_points=values$scaled_points)
             saveRDS(temp,file=file)},
         contentType='RDS')
-    
+
 }
 
