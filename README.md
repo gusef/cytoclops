@@ -5,24 +5,24 @@ A workspace for cytometry data.
 
 How to install in R:
 
-## Generate a github token to access the private repositories
+### Generate a github token to access the private repositories
 
 https://github.com/settings/tokens
 
-##install pacakges from cran
+### Install packages from cran
 
 ```{r}
 install.packages(c('devtools','shiny','shinyBS','Rtsne','shinythemes','V8','data.table','shinyjs','sp')
 ```
 
-##install pacakges from bioconductor
+### Install packages from bioconductor
 
 ```{r}
 source("https://bioconductor.org/biocLite.R")
 biocLite("flowCore")
 ``` 
  
-###load devtools and install the package
+### Load devtools and install the package
 
 ```{r}
 library(devtools)
