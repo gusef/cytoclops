@@ -133,6 +133,10 @@ tsne_ok_button_pressed <- function(input, values){
     mat <- mat[values$gatingPanels[[values$currentID]]@tsne_sample,]
     values$tsne_col <- 'black'
     
+    
+    withProgress(message = 'Running t-SNE ... ',
+                 detail = 'This may take a while...',
+                 value = 0.5, {
     #capture output
     values$verbose <- NULL
     values$verbose <- capture.output(tsne <- Rtsne(mat, 
@@ -140,6 +144,7 @@ tsne_ok_button_pressed <- function(input, values){
                                                    perplexity = input$tSNE_perplexity,
                                                    theta = input$tSNE_theta,
                                                    verbose = TRUE))
+    })
     
     values$gatingPanels[[values$currentID]]@tsne <- tsne
     #add all of the control elements
