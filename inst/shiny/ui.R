@@ -96,7 +96,8 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                  ),
                  tabPanel(title = "Markers",
                           tags$div(id='CurrentPanelTab',
-                                   h4("Select Markers that should be arcsinh transformed for gating:")
+                                   h4("Select Markers that should be arcsinh transformed for gating:"),
+                                   checkboxInput('all_none_arcsinhselect', 'All/None')
                           )
                  ),
                  tabPanel(title = "Settings",

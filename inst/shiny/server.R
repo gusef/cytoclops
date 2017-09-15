@@ -137,6 +137,21 @@ server <- function(input, output, session) {
         show_tsne_modal(input, values)
     })
     
+    #all/none selector for tSNE
+    observe({
+        if (!is.null(input$all_none_tnseselect)){
+            updateCheckboxGroupInput(
+                session, 
+                'tSNEMarkers', 
+                choiceNames = as.list(names(values$markerMapping)),
+                choiceValues = as.list(1:length(values$markerMapping)),
+                selected = if (input$all_none_tnseselect) as.list(1:length(values$markerMapping))
+            )
+        }
+    })
+    
+    
+    
     #if run tsne button has been pushed
     observeEvent(input$tsne_ok_button, {
         tsne_ok_button_pressed(input, values)
@@ -193,7 +208,7 @@ server <- function(input, output, session) {
 
     
 #############################################################################    
-#tSNE panel
+#Marker selection
 #############################################################################    
 
     #if you fiddle around with the markers, and the tSNE was done using arcsinh transformed data it gets dropped
@@ -201,6 +216,17 @@ server <- function(input, output, session) {
         change_arcsinselect(input, values)
     })
     
+    observe({
+        if (!is.null(values$markerMapping)){
+            updateCheckboxGroupInput(
+                session, 
+                'ArcSinhSelect', 
+                choiceNames = as.list(names(values$markerMapping)),
+                choiceValues = as.list(1:length(values$markerMapping)),
+                selected = if (input$all_none_arcsinhselect) as.list(1:length(values$markerMapping))
+            )
+        }
+    })
     
     
     # disable the tSNE downdload button on page load

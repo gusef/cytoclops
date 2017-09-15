@@ -46,10 +46,11 @@ insertGatingPanels <- function(values){
             selector = "#CurrentPanelTab",
             where = "afterEnd",
             ui =  tags$div(id='MarkerPanelInterface',
-                           checkboxGroupInput("ArcSinhSelect", label = NULL, 
+                           tags$div(class = "multicol",
+                                    checkboxGroupInput("ArcSinhSelect", label = NULL, 
                                               choiceNames = as.list(names(values$markerMapping)),
                                               choiceValues = as.list(1:length(values$markerMapping)),
-                                              selected = extractArcsinhTemp(values))  
+                                              selected = extractArcsinhTemp(values)))  
             )
         )
     }

@@ -93,6 +93,7 @@ show_tsne_modal <- function(input, values){
                       label='Run t-SNE using arcsinh transformed values', 
                       value = TRUE),
         tags$div(class = "multicol", 
+            checkboxInput('all_none_tnseselect', 'All/None'),
             checkboxGroupInput("tSNEMarkers", label = NULL, 
                                choiceNames = as.list(names(values$markerMapping)),
                                choiceValues = as.list(1:length(values$markerMapping)),
