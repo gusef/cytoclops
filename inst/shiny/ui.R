@@ -8,7 +8,8 @@ require(sp)
 require(shinyjs)
 require(V8)
 
-source('gating_functions.R')
+source('gating_tab_functions.R')
+source('input_tab_functions.R')
 source('gatingpanel_functions.R')
 source('misc.R')
 source('polygon.R')
@@ -18,7 +19,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
                  
                  tabPanel(title = "File loading",
-                          includeCSS(system.file('www','selectize.css',package='cytoclops')),
+                          includeCSS(system.file('www','cytoclops.css',package='cytoclops')),
                           actionButton("LoadTest", "Load test set"),
                           h3('Load raw input'),
                           fileInput("fcsFile", "Choose raw .FCS file",
@@ -30,16 +31,6 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                  tabPanel(title = "Display panel",
                           shinyjs::useShinyjs(),
                           shinyjs::extendShinyjs(script = system.file('www','overlay.js',package='cytoclops')),
-                          #change the bsmodal with to 95% of the screed
-                          tags$head(tags$style(HTML('
-                                                    .modal-lg {
-                                                    width: 95%;
-                                                    
-                                                    }
-                                                    .navbar {
-                                                    margin-bottom: 0px;
-                                                    }
-                                                    '))),
                           bsAlert("alert"),
                           fluidRow(
                               column(2,
@@ -86,7 +77,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                           ),
                           fluidRow(
                               column(2,
-                                     downloadButton("SaveStateButton", "Save gating")
+                                     downloadButton("SaveStateButton", "Save file")
                               ),
                               column(4,
                                      selectInput("PlotType",

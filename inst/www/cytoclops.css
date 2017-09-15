@@ -8,5 +8,12 @@
     border-radius: 0;
   }
 .selectize-input { height: 10px !important; }
-  
-  
+.selectize-input input[type=text] { height: 12px !important;
+                        background-color: #CCCCCC} 
+ 
+.modal-lg {width: 95%;}
+.navbar {margin-bottom: 0px;}
+.multicol {-webkit-column-count: 3; /* Chrome, Safari, Opera */
+           -moz-column-count: 3; /* Firefox */
+           column-count: 3;}
+                                           

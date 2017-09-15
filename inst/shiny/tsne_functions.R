@@ -51,6 +51,7 @@ map2color<-function(x,pal,limits=NULL){
 #adds all the tsne control inputs
 add_tsne_controls <- function(input, values){
     shinyjs::show(id = "tSNEPanel", anim = TRUE)
+    shinyjs::show(id = "SavetSNE")
     insertUI(
         selector = "#SavetSNE",
         where = "beforeBegin",
@@ -86,14 +87,16 @@ add_tsne_controls <- function(input, values){
 
 show_tsne_modal <- function(input, values){
     showModal(modalDialog(
+        size='l',
         title = "Running t-SNE",
         checkboxInput("tsne_arcsin", 
                       label='Run t-SNE using arcsinh transformed values', 
                       value = TRUE),
-        checkboxGroupInput("tSNEMarkers", label = NULL, 
-                           choiceNames = as.list(names(values$markerMapping)),
-                           choiceValues = as.list(1:length(values$markerMapping)),
-                           selected = extractTSNEMarkers(values)),
+        tags$div(class = "multicol", 
+            checkboxGroupInput("tSNEMarkers", label = NULL, 
+                               choiceNames = as.list(names(values$markerMapping)),
+                               choiceValues = as.list(1:length(values$markerMapping)),
+                               selected = extractTSNEMarkers(values))),
         easyClose = TRUE,
         footer = tagList(
             modalButton("Cancel"),

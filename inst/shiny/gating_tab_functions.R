@@ -7,6 +7,112 @@ replace_gating_list <- function(input, values, session){
     updatejsTreeSelectorInput(session,'TreeGates',dat,selected='G1')
 }
 
+##############################################################################################
+# Helperfunction to get proper names
+getDataTable <- function(choiceNames,choiceValues) {
+    data <- list()
+    for (i in 1:length(choiceNames)) {
+        parent <- NULL
+        v <- unlist(strsplit(unlist(choiceValues[i]),'_'))
+        if(length(v)>1) {
+            parent <- paste(v[1:length(v)-1],collapse='_')
+            entry <- list(id=choiceValues[i],text=choiceNames[i],parent=parent,value=choiceValues[i])
+        } else {
+            entry <- list(id=choiceValues[i],text=choiceNames[i],value=choiceValues[i])
+        }
+        data[[i]] <- entry
+    }
+    return(data)
+}
+
+tree_gate_click <- function(session, input, values){
+    if (is.null(values$gatingPanels) || is.null(values$currentID))
+        return(NULL)
+    values$currentID <- grep(paste0('^',input$TreeGates$value,'$'),names(values$gatingPanels))
+    update_current_gate(session, input, values)
+}
+
+update_current_gate <- function(session, input, values){
+    current <- values$gatingPanels[[values$currentID]]
+    #toggle children input selectize depending on whether there are children
+    if(length(current@children)>0){
+        #update the child selector
+        selection <- lapply(current@children,function(x)x$id)
+        names(selection) <- sapply(current@children,function(x)x$name)
+        updateSelectInput(session,'SelectChild', 
+                          choices = selection)
+        shinyjs::show(id = "SelectChild", anim = TRUE) 
+    }else{
+        shinyjs::hide(id = "SelectChild", anim = TRUE) 
+    }
+    
+    #remove all the tSNE UI
+    removeUI(selector = "#ImposeColorSelector") 
+    removeUI(selector = "#ShowAllMarkersButton") 
+    
+    #if t-SNE was run however add the controls
+    if (length(current@tsne)>0){
+        add_tsne_controls(input, values)
+        shinyjs::show(id = "tSNEPanel", anim = TRUE)
+    }else{
+        shinyjs::hide(id = "tSNEPanel", anim = TRUE)
+    }
+}
+
+#################################################################################
+#delete a gate
+delete_gate_modal <- function(input, values, session){
+    showModal(modalDialog(
+        title = "Delete current gate",
+        "Are you sure you would like to delete the current gate? This cannot be undone.",
+        easyClose = TRUE,
+        footer = tagList(
+            modalButton("Cancel"),
+            actionButton("delete_gate_button", "Delete gate"))                
+    ))
+}
+
+press_delete_gating_ok <- function(input, values, session){
+    #remove the gate remove modal
+    removeModal()
+    #check if this is the root
+    if (names(values$gatingPanels)[values$currentID] == 'G1'){
+        showModal(modalDialog(
+            title = "Error",
+            "Cannot delete whole sample."
+        ))
+    #if its not delete the gate and all children
+    } else {
+        #get current gate and name
+        currentPanel <- values$gatingPanels[[values$currentID]]
+        currentName <- names(values$gatingPanels)[values$currentID]
+        
+        #get the parent ID        
+        parent_idx <- match(currentPanel@parent,names(values$gatingPanels))
+
+        #remove child from the parent
+        child_index <- match(currentName,names(values$gatingPanels[[parent_idx]]@children))
+        values$gatingPanels[[parent_idx]]@children <- values$gatingPanels[[parent_idx]]@children[-child_index]
+        
+        #delete all children and own gate
+        values$gatingPanels <- values$gatingPanels[-grep(currentName,names(values$gatingPanels))]
+
+        #set the current index to the parent gate
+        values$currentID <- parent_idx
+        
+        #update the gating panel
+        update_current_gate(session, input, values)
+        
+        #replace the old gating list on the side
+        replace_gating_list(input, values, session)
+        
+    }
+
+}
+
+
+#################################################################################
+#gate the currently selected population
 gating_modal <- function(input, values, session){
     if((!is.null(values$scaled_points) && 
         length(values$scaled_points$x) > 2) || 
@@ -63,24 +169,6 @@ setNewChild <- function(input, values, parent){
     return(kid_name)
 }
 
-
-# From a vector of names and values (which are essentially IDs) return a suitable object for treeTable
-getDataTable <- function(choiceNames,choiceValues) {
-  data <- list()
-  for (i in 1:length(choiceNames)) {
-    parent <- NULL
-    v <- unlist(strsplit(unlist(choiceValues[i]),'_'))
-    if(length(v)>1) {
-      parent <- paste(v[1:length(v)-1],collapse='_')
-      entry <- list(id=choiceValues[i],text=choiceNames[i],parent=parent,value=choiceValues[i])
-    } else {
-      entry <- list(id=choiceValues[i],text=choiceNames[i],value=choiceValues[i])
-    }
-    data[[i]] <- entry
-  }
-  return(data)
-}
-
 press_gating_ok <- function(input, values, session){
     #if in polygon mode get the selected from the polygon else from brush
     if(!is.null(values$scaled_points)){
@@ -118,11 +206,13 @@ press_gating_ok <- function(input, values, session){
     removeUI(selector = "#ImposeColorSelector")
     removeUI(selector = "#ShowAllMarkersButton") 
     shinyjs::hide(id = "tSNEPanel", anim = TRUE)
+    shinyjs::hide("SavetSNE")
     #replace the old gating list on the side
     replace_gating_list(input, values, session)
     
 }
 
+##################################################################################
 select_child <- function(session, input, values){
     if (is.null(values$gatingPanels) || length(values$gatingPanels[[values$currentID]]@children)==0){
         return(NULL)
@@ -137,37 +227,7 @@ select_child <- function(session, input, values){
     
 }
 
-tree_gate_click <- function(session, input, values){
-  if (is.null(values$gatingPanels) || is.null(values$currentID))
-    return(NULL)
-  values$currentID <- grep(paste0('^',input$TreeGates$value,'$'),names(values$gatingPanels))
-  
-  current <- values$gatingPanels[[values$currentID]]
-  #toggle children input selectize depending on whether there are children
-  if(length(current@children)>0){
-    #update the child selector
-    selection <- lapply(current@children,function(x)x$id)
-    names(selection) <- sapply(current@children,function(x)x$name)
-    updateSelectInput(session,'SelectChild', 
-                      choices = selection)
-    shinyjs::show(id = "SelectChild", anim = TRUE) 
-  }else{
-    shinyjs::hide(id = "SelectChild", anim = TRUE) 
-  }
-  
-  #remove all the tSNE UI
-  removeUI(selector = "#ImposeColorSelector") 
-  removeUI(selector = "#ShowAllMarkersButton") 
-  
-  #if t-SNE was run however add the controls
-  if (length(current@tsne)>0){
-    add_tsne_controls(input, values)
-    shinyjs::show(id = "tSNEPanel", anim = TRUE)
-  }else{
-    shinyjs::hide(id = "tSNEPanel", anim = TRUE)
-  }
-}
-
+#################################################################################
 #save the current state
 press_save_gating <- function(input, values){
     showModal(modalDialog(
@@ -180,10 +240,8 @@ press_save_gating <- function(input, values){
     ))
 }
 
+
 #save the current state
-###################################################
-#TODO: this needs to be updated with the latest ver
-######################################################
 press_ok_gating <- function(input, values){
     filename <- input$newFileName
     filename <- paste0(sub('\\.[Rr][Dd][Ss]','',filename),'.RDS')

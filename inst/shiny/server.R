@@ -33,6 +33,35 @@ server <- function(input, output, session) {
     observeEvent(input$rdsFile,{ 
         loadGating(input, values, input$rdsFile$datapath,session)
     })
+
+    
+#############################################################################    
+#Display of the Gating tree 
+#############################################################################    
+    
+    #set the currentID to the newly selected gate
+    observeEvent(input$TreeGates,{
+        tree_gate_click(session, input, values)
+    })
+    
+    #save the current state
+    output$SaveStateButton <- downloadHandler(
+        filename = function() {
+            paste("Gatings_", Sys.Date(), ".rds", sep="")
+        },
+        content = function(file) {
+            state <- list()
+            for (idx in names(values)){
+                state[[idx]] <- values[[idx]]
+            }
+            saveRDS(state,file=file)},
+        contentType='rds')
+    
+    
+
+#############################################################################    
+#Gating panel
+#############################################################################    
     
     #simple gating panel
     output$GatingPanel <- renderPlot({
@@ -61,7 +90,7 @@ server <- function(input, output, session) {
     })
     
     #saves a pdf of the current gate
-    output$SaveGate <-    downloadHandler(
+    output$SaveGate <- downloadHandler(
         filename = function() {
             paste("Gating_", Sys.Date(), ".pdf", sep="")
         },
@@ -70,16 +99,38 @@ server <- function(input, output, session) {
             plot_gates(input, values)
             dev.off()},
         contentType='pdf')
-   
-    #if you fiddle around with the markers, and the tSNE was done using arcsinh transformed data it gets dropped
-    observeEvent(input$ArcSinhSelect, {
-        change_arcsinselect(input, values)
-    })
-    
+
+
     #dropdown that selects the appropriate child
     observeEvent(input$SelectChild, {
         select_child(session, input, values)
     })
+    
+    
+    #Pressing the delete gate button
+    observeEvent(input$DeleteGateButton, {
+        delete_gate_modal(input, values, session)
+    })
+
+    #Pressing the OK button in the delete gate modal
+    observeEvent(input$delete_gate_button, {
+        press_delete_gating_ok(input, values, session)
+    })
+    
+    #Pressing the gating button
+    observeEvent(input$GateButton, {
+        gating_modal(input, values, session)
+    })
+    
+    #Pressing the OK button in the gating modal
+    observeEvent(input$gate_ok_button, {
+        press_gating_ok(input, values, session)
+    })
+    
+    
+#############################################################################    
+#tSNE panel
+#############################################################################    
     
     #tun the bh-SNE when the button is pressed
     observeEvent(input$RunTSNE, {
@@ -134,46 +185,26 @@ server <- function(input, output, session) {
         values$selectedPoints <- NULL
     })
     
-    #Pressing the gating button
-    observeEvent(input$GateButton, {
-        gating_modal(input, values, session)
-    })
-    
-    #Pressing the OK button in the gating modal
-    observeEvent(input$gate_ok_button, {
-        press_gating_ok(input, values, session)
-    })
-    
-    #set the currentID to the newly selected gate
-    observeEvent(input$TreeGates,{
-        tree_gate_click(session, input, values)
-    })
     
     output$Verbose <- renderPrint({
         values$verbose
     })
+
+
     
-    #save the current state
-    output$SaveStateButton <-    downloadHandler(
-        filename = function() {
-            paste("Gatings_", Sys.Date(), ".RDS", sep="")
-        },
-        content = function(file) {
-            temp <- list(flowFrame = values$flowFrame,
-                         gatingPanels=values$gatingPanels,
-                         currentID=values$currentID,
-                         channels=values$channels,
-                         markerMapping=values$markerMapping,
-                         selectedPoints=values$selectedPoints,
-                         verbatimOutput=values$verbatimOutput,
-                         tsne_current_marker=values$tsne_current_marker,
-                         tsne_col=values$tsne_col,
-                         tSNE_markers=values$tSNE_markers, 
-                         tsne_arcsintransform=values$tsne_arcsintransform,
-                         verbose=values$verbose,
-                         scaled_points=values$scaled_points)
-            saveRDS(temp,file=file)},
-        contentType='RDS')
+#############################################################################    
+#tSNE panel
+#############################################################################    
+
+    #if you fiddle around with the markers, and the tSNE was done using arcsinh transformed data it gets dropped
+    observeEvent(input$ArcSinhSelect, {
+        change_arcsinselect(input, values)
+    })
+    
+    
+    
+    # disable the tSNE downdload button on page load
+    shinyjs::hide("SavetSNE")
 
 }
 

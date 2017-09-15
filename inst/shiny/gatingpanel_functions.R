@@ -35,7 +35,8 @@ insertGatingPanels <- function(values){
         selector = "#GatingPanel",
         where = "afterEnd",
         ui =  tags$div(id='BelowGatingPanelInterface',
-                       actionButton("GateButton", "Gate selected"),
+                       actionButton("DeleteGateButton", "Delete Gate"),
+                       actionButton("GateButton", "Gate cells"),
                        actionButton("RunTSNE", "Run TSNE")
         )
     )
@@ -82,26 +83,6 @@ instantiate_panels <- function(input, values, file, session){
     replace_gating_list(input,values,session)
 }
 
-loadGating <- function(input, values, file, session){
-    #clean up
-    removeUI(selector = "#AboveGatingPanelInterface")
-    removeUI(selector = "#BelowGatingPanelInterface")
-    removeUI(selector = "#MarkerPanelInterface")
-    removeUI(selector = "#ImposeColorSelector") 
-    removeUI(selector = "#ShowAllMarkersButton") 
-    values$verbatimOutput <- ''
-    
-    #read the raw values
-    temp <- readRDS(file)
-    
-    for (idx in names(temp)){
-        values[[idx]] <- temp[[idx]]
-    }
-
-    #add new UI elements
-    insertGatingPanels(values)
-    replace_gating_list(input,values,session)
-}
 
 #draw the actual polygon
 drawPolygon <- function(x, y, idx, cols){
