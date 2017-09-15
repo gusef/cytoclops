@@ -29,7 +29,8 @@ arcsinTransform <- function(marker, mat, map, input){
 extractArcsinhTemp <- function(values){
     markers <- names(values$markerMapping)
     selected <- rep(FALSE,length(markers))
-    selected[grep('::',markers)] <- TRUE
+    #grep('::',markers)
+    selected[markers != 'Time'] <- TRUE
     return(as.list((1:length(markers))[selected]))
 }
 
