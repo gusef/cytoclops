@@ -4,10 +4,10 @@ GatingPanel <- setClass("GatingPanel",
                                   gate_name = "character",
                                   children = "list",
                                   parent = "character",
-                                  gates= "list",
+                                  gates = "list",
                                   tsne = "list",
-                                  tsne_sample="numeric"))
-
+                                  tsne_sample="numeric",
+                                  filename='character'))
 
 
 insertGatingPanels <- function(values){
@@ -48,40 +48,12 @@ insertGatingPanels <- function(values){
             ui =  tags$div(id='MarkerPanelInterface',
                            tags$div(class = "multicol",
                                     checkboxGroupInput("ArcSinhSelect", label = NULL, 
-                                              choiceNames = as.list(names(values$markerMapping)),
-                                              choiceValues = as.list(1:length(values$markerMapping)),
-                                              selected = extractArcsinhTemp(values)))  
+                                                       choiceNames = as.list(names(values$markerMapping)),
+                                                       choiceValues = as.list(1:length(values$markerMapping)),
+                                                       selected = extractArcsinhTemp(values)))  
             )
         )
     }
-}
-
-instantiate_panels <- function(input, values, file, session){
-    #clean up
-    removeUI(selector = "#AboveGatingPanelInterface")
-    removeUI(selector = "#BelowGatingPanelInterface")
-    removeUI(selector = "#MarkerPanelInterface")
-    removeUI(selector = "#ImposeColorSelector") 
-    values$verbatimOutput <- ''
-    
-    #read the raw values
-    values$flowFrame <- read.FCS(file)
-    values$currentID <- 1
-    values$markerMapping <- extractMarkerPanel(input, values)
-    
-    #generate the underlying object that holds all information for the gates
-    newGatingPanel <- GatingPanel()
-    newGatingPanel@gate_name <- 'All'
-    newGatingPanel@indices <- 1:nrow(values$flowFrame)
-    
-    #generate the object that holds all gating panels
-    values$gatingPanels <- list()
-    values$gatingPanels[[1]] <- newGatingPanel 
-    names(values$gatingPanels) <- 'G1'
-    
-    #add new UI elements
-    insertGatingPanels(values)
-    replace_gating_list(input,values,session)
 }
 
 
@@ -112,7 +84,7 @@ draw_children <- function(input, values){
 plot_gates <- function(input, values){
     if (is.null(values$gatingPanels) || is.null(values$currentID) || is.null(input$Select_x_channels))
         return(NULL)
-    mat <- exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,])
+    mat <- get_current_cells(values)
     xVal <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
     yVal <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
     
@@ -148,18 +120,8 @@ plot_gates <- function(input, values){
 
 
 get_current_tsne <- function(input, values){
-    #there are 4 combinations: both arcsinh space, both normal space, one normal the other arcsinh and vice versa
-    mat <- exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,])
-    if (values$tsne_arcsintransform){
-        map <- values$markerMapping
-        selected_markers <- names(map)[as.numeric(input$ArcSinhSelect)]
-        for (mark in selected_markers){
-            mat[,map[mark]] <- asinh(mat[,map[mark]]/input$arcsinh_par)
-        }
-    }
-    
     #make sure the dots are transformed if the panel is transformed
-    mat <- data.frame(exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,]))
+    mat <- get_current_cells(values)
     mat[,values$markerMapping[input$Select_x_channels]] <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
     mat[,values$markerMapping[input$Select_y_channels]] <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
     return(mat)

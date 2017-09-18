@@ -7,6 +7,8 @@ require(htmltools)
 require(sp)
 require(shinyjs)
 require(V8)
+require(DT)
+require(Biobase)
 
 source('gating_tab_functions.R')
 source('input_tab_functions.R')
@@ -20,13 +22,17 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                  
                  tabPanel(title = "File loading",
                           includeCSS(system.file('www','cytoclops.css',package='cytoclops')),
-                          actionButton("LoadTest", "Load test set"),
-                          h3('Load raw input'),
-                          fileInput("fcsFile", "Choose raw .FCS file",
+                          h4('Load raw input'),
+                          fileInput("fcsFile", "Add .FCS file",
                                     accept = c(".fcs",".FCS")),
-                          h3('Load pre-gated set'),
+                          DT::dataTableOutput("file_table"),
+                          h4('Load pre-gated set'),
                           fileInput("rdsFile", "Choose .RDS file",
                                     accept = c(".rds",".RDS"))
+                 ),
+                 tabPanel(title = "Cleanup and QC"
+                 ),
+                 tabPanel(title = "FlowSOM"
                  ),
                  tabPanel(title = "Display panel",
                           shinyjs::useShinyjs(),

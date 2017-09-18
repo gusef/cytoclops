@@ -25,6 +25,7 @@ arcsinTransform <- function(marker, mat, map, input){
     return(current_vals)
 }
 
+
 #helper function that determines which markers should be pre-selected for arcsinh transformation
 extractArcsinhTemp <- function(values){
     markers <- names(values$markerMapping)
@@ -35,11 +36,10 @@ extractArcsinhTemp <- function(values){
 }
 
 #function that extracts the markers, makes a map and handles the proper ordering
-
-extractMarkerPanel <- function(input, values){
-    chan <- pData(parameters(values$flowFrame))[,c('name','desc')]
+extractMarkerPanel <- function(set){
+    chan <- pData(parameters(set))[,c('name','desc')]
     chan <- paste(chan$name,chan$desc,sep='::')
-    vals <- colnames(values$flowFrame) 
+    vals <- colnames(set) 
     names(vals) <- sub('::NA','',chan)
     #Katja's custom order (might be extended, by adding options into the settings
     actual <- grep('..[0-9]+',vals)
@@ -54,5 +54,19 @@ change_arcsinselect <- function(input, values){
             removeUI(selector = "#ImposeColorSelector")
         }
     }
+}
+
+#returns a matrix with the cells of the current gate in a particular file
+get_current_cells <- function(values){
+    
+    #figure out which file we are working on
+    flownames <- get_filenames_from_flowSet(values$flowset)
+    file_index <- match(values$gatingPanels[[values$currentID]]@filename,flownames)
+
+    #access the actual cells
+    mat <- data.frame(exprs(values$flowset[[file_index]]))
+    mat <- data.frame(exprs(values$flowset[[file_index]][values$gatingPanels[[values$currentID]]@indices,]))
+    
+    return(mat)
 }
 

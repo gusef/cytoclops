@@ -10,7 +10,22 @@
 .selectize-input { height: 10px !important; }
 .selectize-input input[type=text] { height: 12px !important;
                         background-color: #CCCCCC} 
- 
+
+/* table formatting */
+.dataTable {color: #000000}
+.dataTables_filter {color: #FFFFFF}
+.dt-right {color: #000000}
+.sorting_asc {color: #FFFFFF}
+.sorting {color: #FFFFFF}
+.dataTables_info {color: #FFFFFF}
+
+/* node tree formatting */
+
+.jstree-node {font-size: 8px;}
+.jstree-anchor {font-size: 10px;}
+
+
+/*general shiny formatting */
 .modal-lg {width: 95%;}
 .navbar {margin-bottom: 0px;}
 .multicol {-webkit-column-count: 3; /* Chrome, Safari, Opera */

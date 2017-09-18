@@ -17,8 +17,13 @@ extractTSNEMarkers <- function(values){
 plot_all_tsne_markers <- function(input, values){
     pal <- colorRampPalette(c("#000099", "#00FEFF", "#45FE4F","#FCFF00", "#FF9400", "#FF3100"))(256)
     map <- values$markerMapping
+    
+    #figure out which markers should be arcsinh transformed
     arcsinh_transformed <- names(map)[as.numeric(input$ArcSinhSelect)]
-    mat <- data.frame(exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,]))
+    
+    mat <- get_current_cells(values)
+    
+    #determine the number of plots
     nplots <- as.numeric(input$tSNE_overlay_num_columns) 
     op <- par(mfrow=c(ceiling(length(map)/nplots),nplots))
     for (idx in 1:length(map)){
@@ -98,6 +103,7 @@ show_tsne_modal <- function(input, values){
                                choiceNames = as.list(names(values$markerMapping)),
                                choiceValues = as.list(1:length(values$markerMapping)),
                                selected = extractTSNEMarkers(values))),
+            
         easyClose = TRUE,
         footer = tagList(
             modalButton("Cancel"),
@@ -115,7 +121,8 @@ tsne_ok_button_pressed <- function(input, values){
     removeModal()
     
     #get the values
-    mat <- exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,])
+    mat <- get_current_cells(values)
+    
     if (values$tsne_arcsintransform){
         map <- values$markerMapping
         selected_markers <- names(map)[as.numeric(input$ArcSinhSelect)]
@@ -179,7 +186,7 @@ tsne_impose_marker <- function(input, values){
     
     #get the values of the selected marker
     map <- values$markerMapping
-    mat <- data.frame(exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,]))
+    mat <- get_current_cells(values)
     vals <- mat[,map[input$select_tsne_impose]]
     
     #do an arcsinh transform is the box is checked

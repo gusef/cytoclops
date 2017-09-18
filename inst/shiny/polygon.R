@@ -56,7 +56,7 @@ get_polygon_selected <- function(input, values){
     spatpoly <- SpatialPolygons(list(poly))
     
     #extract the current data values
-    mat <- exprs(values$flowFrame[values$gatingPanels[[values$currentID]]@indices,])
+    mat <- get_current_cells(values)
     xVal <- arcsinTransform(input$Select_x_channels, mat, values$markerMapping, input)
     yVal <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
     data <- data.frame(x=xVal,y=yVal,id=1:nrow(mat))

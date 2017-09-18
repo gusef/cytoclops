@@ -5,7 +5,8 @@ server <- function(input, output, session) {
     options(shiny.maxRequestSize=500*1024^2)
     
     #reactive values
-    values <- reactiveValues(flowFrame = NULL,
+    values <- reactiveValues(file_table = NULL,
+                             flowset = NULL,
                              gatingPanels=NULL,
                              currentID=NULL,
                              channels=NULL,
@@ -21,12 +22,25 @@ server <- function(input, output, session) {
     
     #file loading
     observeEvent(input$fcsFile,{ 
-        instantiate_panels(input, values, input$fcsFile$datapath, session)
+        load_file(input, values,session)
     })
     
-    #file loading - testset
-    observeEvent(input$LoadTest,{
-        instantiate_panels(input, values, system.file('extdata','test.fcs',package='cytoclops'), session) 
+    output$file_table <- DT::renderDataTable(
+        values$file_table, 
+        server = FALSE, 
+        escape = FALSE, 
+        selection = 'none', 
+        extensions = 'Scroller', 
+        options = list(
+            deferRender = TRUE,
+            scrollY = 200,
+            scroller = TRUE
+        )
+    )
+    
+    #remove a single file from the fcs file table
+    observeEvent(input$remove_fcs_file, {
+        remove_fcs_file(input,values,session)
     })
     
     #file loading
@@ -106,7 +120,6 @@ server <- function(input, output, session) {
         select_child(session, input, values)
     })
     
-    
     #Pressing the delete gate button
     observeEvent(input$DeleteGateButton, {
         delete_gate_modal(input, values, session)
@@ -139,7 +152,7 @@ server <- function(input, output, session) {
     
     #all/none selector for tSNE
     observe({
-        if (!is.null(input$all_none_tnseselect)){
+        if (!is.null(values$markerMapping) && !is.null(input$all_none_tnseselect)){
             updateCheckboxGroupInput(
                 session, 
                 'tSNEMarkers', 
@@ -150,15 +163,13 @@ server <- function(input, output, session) {
         }
     })
     
-    
-    
     #if run tsne button has been pushed
     observeEvent(input$tsne_ok_button, {
         tsne_ok_button_pressed(input, values)
     })
 
     #saves a pdf of the current tSNE plot
-    output$SavetSNE <-    downloadHandler(
+    output$SavetSNE <- downloadHandler(
         filename = function() {
             paste("tSNE_", Sys.Date(), ".pdf", sep="")
         },
@@ -200,7 +211,6 @@ server <- function(input, output, session) {
         values$selectedPoints <- NULL
     })
     
-    
     output$Verbose <- renderPrint({
         values$verbose
     })
@@ -227,7 +237,6 @@ server <- function(input, output, session) {
             )
         }
     })
-    
     
     # disable the tSNE downdload button on page load
     shinyjs::hide("SavetSNE")

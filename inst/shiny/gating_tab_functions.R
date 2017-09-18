@@ -4,7 +4,7 @@ replace_gating_list <- function(input, values, session){
     gate_names <- sapply(values$gatingPanels,function(x)x@gate_name)
     names(gate_names) <- NULL
     dat <- getDataTable(gate_names,names(values$gatingPanels))
-    updatejsTreeSelectorInput(session,'TreeGates',dat,selected='G1')
+    updatejsTreeSelectorInput(session,'TreeGates',dat,selected=dat[[1]]$id)
 }
 
 ##############################################################################################
@@ -76,7 +76,7 @@ press_delete_gating_ok <- function(input, values, session){
     #remove the gate remove modal
     removeModal()
     #check if this is the root
-    if (names(values$gatingPanels)[values$currentID] == 'G1'){
+    if (length(grep('_',names(values$gatingPanels)[values$currentID])) == 0){
         showModal(modalDialog(
             title = "Error",
             "Cannot delete whole sample."
@@ -105,9 +105,7 @@ press_delete_gating_ok <- function(input, values, session){
         
         #replace the old gating list on the side
         replace_gating_list(input, values, session)
-        
     }
-
 }
 
 
@@ -180,6 +178,7 @@ press_gating_ok <- function(input, values, session){
     newGating <- GatingPanel()
     newGating@indices <- values$gatingPanels[[values$currentID]]@indices[selected]
     newGating@gate_name <- input$newGateName
+    newGating@filename <- values$gatingPanels[[values$currentID]]@filename
     parent <- names(values$gatingPanels)[values$currentID]
     newGating@parent <- parent
     
@@ -241,27 +240,27 @@ press_save_gating <- function(input, values){
 }
 
 
-#save the current state
-press_ok_gating <- function(input, values){
-    filename <- input$newFileName
-    filename <- paste0(sub('\\.[Rr][Dd][Ss]','',filename),'.RDS')
-    
-    temp <- list(flowFrame = values$flowFrame,
-                 gatingPanels=values$gatingPanels,
-                 currentID=values$currentID,
-                 channels=values$channels,
-                 markerMapping=values$markerMapping,
-                 selectedPoints=values$selectedPoints,
-                 verbatimOutput=values$verbatimOutput,
-                 tsne_current_marker=values$tsne_current_marker,
-                 tsne_col=values$tsne_col,
-                 tSNE_markers=values$tSNE_markers, 
-                 tsne_arcsintransform=values$tsne_arcsintransform,
-                 verbose=values$verbose)
-    
-    saveRDS(temp,file=file.path(getwd(),filename))
-    removeModal()
-}
+# #save the current state
+# press_ok_gating <- function(input, values){
+#     filename <- input$newFileName
+#     filename <- paste0(sub('\\.[Rr][Dd][Ss]','',filename),'.RDS')
+#     
+#     temp <- list(flowFrame = values$flowFrame,
+#                  gatingPanels=values$gatingPanels,
+#                  currentID=values$currentID,
+#                  channels=values$channels,
+#                  markerMapping=values$markerMapping,
+#                  selectedPoints=values$selectedPoints,
+#                  verbatimOutput=values$verbatimOutput,
+#                  tsne_current_marker=values$tsne_current_marker,
+#                  tsne_col=values$tsne_col,
+#                  tSNE_markers=values$tSNE_markers, 
+#                  tsne_arcsintransform=values$tsne_arcsintransform,
+#                  verbose=values$verbose)
+#     
+#     saveRDS(temp,file=file.path(getwd(),filename))
+#     removeModal()
+# }
 
 
 
