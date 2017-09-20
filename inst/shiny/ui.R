@@ -1,21 +1,9 @@
-require(shiny)
-require(shinyBS)
-require(CIOShiny)
-require(jsonlite)
-require(shinythemes)
-require(htmltools)
-require(sp)
-require(shinyjs)
-require(V8)
-require(DT)
-require(Biobase)
-
-source('gating_tab_functions.R')
-source('input_tab_functions.R')
-source('gatingpanel_functions.R')
-source('misc.R')
-source('polygon.R')
-source('tsne_functions.R')
+ source('gating_tab_functions.R')
+ source('input_tab_functions.R')
+ source('gatingpanel_functions.R')
+ source('misc.R')
+ source('polygon.R')
+ source('tsne_functions.R')
 
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
@@ -63,10 +51,7 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                                                         fill = "#FF1414", 
                                                         stroke = "#FF1414"
                                                     ))),
-                                     shinyjs::hidden(
-                                         selectInput("SelectChild",
-                                                     label = NULL, 
-                                                     choices = NULL))
+                                     DT::dataTableOutput("children_table")
                               ),
                               
                               column(4,align='center',
@@ -88,10 +73,10 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                               column(4,
                                      selectInput("PlotType",
                                                  label = "Plot type:", 
-                                                 choices = list("Smooth Scatter" = "smooth",
-                                                                "Density plot" = "density",  
-                                                                "Regular Scatter" = "regular"), 
-                                                 selected = "smooth")
+                                                 choices = list("Density plot" = "density",  
+                                                                "Regular Scatter" = "regular",
+                                                                "Smooth Scatter" = "smooth"), 
+                                                 selected = "density")
                               ),
                               column(4,
                                      tags$div(id='AboveVisneSpace')   
@@ -123,6 +108,11 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                                        max = 0.1,
                                        min = 10,
                                        label = 'Dot size'),
+                          numericInput(inputId = 'plot_downsample',
+                                       value = 2,
+                                       max = 1,
+                                       min = 5,
+                                       label = 'Downsample raster'),
                           h3('tSNE parameters'),
                           numericInput(inputId = 'tSNE_iter',
                                        value = 500,

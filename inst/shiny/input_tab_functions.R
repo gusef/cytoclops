@@ -9,13 +9,13 @@ get_filenames_from_flowSet <- function(set){
     return(fset_names)
 }
 
-
 load_file <- function(input, values,session){
     #if this is the first file instantiate the panels and open up the file table
     if (is.null(values$file_table)){
         instantiate_panels(input, values, input$fcsFile$datapath, session)
+
+    #if this is not the first file check if the new file has the same format
     } else {
-        #if this is not the first file check if the new file has the same format
         new_fcs <- read.FCS(input$fcsFile$datapath)
         new_markers <- extractMarkerPanel(new_fcs)
         
@@ -124,11 +124,11 @@ add_additional_flowset <- function(new_fcs, input, values, session){
     replace_gating_list(input,values,session)
 }
 
+
 remove_fcs_file <- function(input,values,session){
 
     #if the last sample was removed
     if (length(values$flowset) > 1){
-        
         #figure out what row was selected
         selectedRow <- as.numeric(strsplit(input$remove_fcs_file, "_")[[1]][2])
         
@@ -154,7 +154,6 @@ remove_fcs_file <- function(input,values,session){
         #reset the jstree
         replace_gating_list(input,values,session)
         
-    
     #if the last sample was removed
     }else{
         #clean up
@@ -167,13 +166,10 @@ remove_fcs_file <- function(input,values,session){
         values$gatingPanels <- NULL
         values$file_table <- NULL
         values$markerMapping <- NULL
-        
     }
 }
 
-
-
-
+#Load a prior state
 loadGating <- function(input, values, file, session){
     #clean up
     removeUI(selector = "#AboveGatingPanelInterface")

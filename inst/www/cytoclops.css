@@ -1,5 +1,4 @@
-.selectize-input { font-size: 75% !important; 
-                   line-height: 10px !important;}
+
 .selectize-dropdown {font-size: 75% !important; 
                      line-height: 10px !important; 
                      background-color: #CCCCCC}
@@ -7,12 +6,23 @@
 .selectize-input, .selectize-input.dropdown-active, .selectize-dropdown {
     border-radius: 0;
   }
-.selectize-input { height: 10px !important; }
+.selectize-input { 
+    font-size: 75%;
+    line-height: 10px;
+    height: 10px; 
+    padding-top: 3px;
+    padding-bottom: 3px;
+    min-height: 20px;
+}
 .selectize-input input[type=text] { height: 12px !important;
                         background-color: #CCCCCC} 
 
 /* table formatting */
-.dataTable {color: #000000}
+table.dataTable tbody td {color: #000000;
+            padding-top: 4px !important;
+            padding-bottom: 4px !important;
+            font-size: 12px;
+}
 .dataTables_filter {color: #FFFFFF}
 .dt-right {color: #000000}
 .sorting_asc {color: #FFFFFF}
@@ -22,8 +32,12 @@
 /* node tree formatting */
 
 .jstree-node {font-size: 8px;}
-.jstree-anchor {font-size: 10px;}
-
+.jstree-default .jstree-clicked {background: #444444}
+.jstree-default .jstree-anchor {
+    font-size: 11px;
+    line-height: 18px;
+    height: 18px;
+}
 
 /*general shiny formatting */
 .modal-lg {width: 95%;}
@@ -31,4 +45,19 @@
 .multicol {-webkit-column-count: 3; /* Chrome, Safari, Opera */
            -moz-column-count: 3; /* Firefox */
            column-count: 3;}
-                                           
+.btn {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+
+}
+   
+.form-control {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: 12px;
+    height: 35px;
+}                                        

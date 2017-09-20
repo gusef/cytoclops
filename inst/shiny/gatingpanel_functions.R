@@ -68,7 +68,7 @@ drawPolygon <- function(x, y, idx, cols){
 
 #draw the polygon on top of the plot if it's the right markers
 draw_children <- function(input, values){
-    cols <- c("#FF0099FF","#CC00FFFF","#00FFFFFF","#555555")
+    cols <- rainbow(15)[15:1]
     idx <- 1
     for (child in values$gatingPanels[[values$currentID]]@children){
         #if the markers are exactly the same
@@ -81,6 +81,22 @@ draw_children <- function(input, values){
     }
 }
 
+#contains all of the transform and color gradient  functions
+plot_colorByDensity <- function(x1,x2,
+                                ylim=c(min(x2),max(x2)),
+                                xlim=c(min(x1),max(x1)),
+                                xlab="",ylab="",main="",cex=2) {
+    df <- data.frame(x1,x2)
+    x <- densCols(x1,x2, colramp=colorRampPalette(c("black", "white")))
+    df$dens <- col2rgb(x)[1,] + 1L
+    cols <-  colorRampPalette(c("#000099", "#00FEFF", "#45FE4F","#FCFF00", "#FF9400", "#FF3100"))(256)
+    df$col <- cols[df$dens]
+    plot(x2~x1, data=df[order(df$dens),], 
+         ylim=ylim,xlim=xlim,pch=20,col=col,
+         cex=cex,xlab=xlab,ylab=ylab,
+         main=main)
+}
+
 plot_gates <- function(input, values){
     if (is.null(values$gatingPanels) || is.null(values$currentID) || is.null(input$Select_x_channels))
         return(NULL)
@@ -89,32 +105,55 @@ plot_gates <- function(input, values){
     yVal <- arcsinTransform(input$Select_y_channels, mat, values$markerMapping, input)
     
     par(mar=c(4.1,4.1,1.1,1.1))
-    if (input$PlotType=='density'){
-        plot_colorByDensity(xVal,
-                            yVal,
-                            xlab=input$Select_x_channels,
-                            ylab=input$Select_y_channels,
-                            cex=input$graphics_cex)  
-    }else if(input$PlotType=='smooth'){
+    #either use a density plot
+    if(input$PlotType=='smooth'){
         smoothScatter(xVal,
                       yVal, 
                       xlab=input$Select_x_channels,
                       ylab=input$Select_y_channels,
-                      transformation = function(x) x^.5,
+                      transformation = function(x) x^.25,
                       colramp = colorRampPalette(c("#FFFFFF","#000099", 
                                                    "#00FEFF", "#45FE4F",
                                                    "#FCFF00", "#FF9400", 
                                                    "#FF3100")),
-                      pch = ".")
-
+                      pch = '.')
+    #or downsample based on location
     }else{
-        plot(xVal,
-             yVal,
-             xlab=input$Select_x_channels,
-             ylab=input$Select_y_channels,
-             pch=20,
-             cex=input$graphics_cex)    
+        df <- data.frame(x = round(xVal, digits = input$plot_downsample),
+                         y = round(yVal, digits = input$plot_downsample))
+        downsample <- !duplicated(df)
+
+        if (input$PlotType=='density'){
+            plot_colorByDensity(df$x[downsample],
+                                df$y[downsample],
+                                xlab=input$Select_x_channels,
+                                ylab=input$Select_y_channels,
+                                cex=input$graphics_cex)  
+        }else{
+            #color all cells black
+            if (is.null(values$current_child)){
+                col = 'black'
+                #unless a child gate was selected then color the children red
+            } else {
+                current_ind <- values$gatingPanels[[values$currentID]]@indices
+                child_ind <- values$gatingPanels[[values$current_child]]@indices
+                
+                col <- rep('black',length(current_ind))
+                col[current_ind %in% child_ind] <- 'red'
+                col <- col[downsample]
+            }
+            
+            plot(df$x[downsample],
+                 df$y[downsample],
+                 xlab = input$Select_x_channels,
+                 ylab = input$Select_y_channels,
+                 pch = 20,
+                 col = col,
+                 cex = input$graphics_cex)   
+        }
+        
     }
+
     draw_children(input, values)
 }
 

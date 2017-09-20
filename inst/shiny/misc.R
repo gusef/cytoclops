@@ -1,18 +1,4 @@
-#contains all of the transform and color gradient  functions
-plot_colorByDensity <- function(x1,x2,
-                                ylim=c(min(x2),max(x2)),
-                                xlim=c(min(x1),max(x1)),
-                                xlab="",ylab="",main="",cex=2) {
-    df <- data.frame(x1,x2)
-    x <- densCols(x1,x2, colramp=colorRampPalette(c("black", "white")))
-    df$dens <- col2rgb(x)[1,] + 1L
-    cols <-  colorRampPalette(c("#000099", "#00FEFF", "#45FE4F","#FCFF00", "#FF9400", "#FF3100"))(256)
-    df$col <- cols[df$dens]
-    plot(x2~x1, data=df[order(df$dens),], 
-         ylim=ylim,xlim=xlim,pch=20,col=col,
-         cex=cex,xlab=xlab,ylab=ylab,
-         main=main)
-}
+
 
 #transforms a single marker to arcsinh
 arcsinTransform <- function(marker, mat, map, input){
