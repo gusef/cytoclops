@@ -1,5 +1,76 @@
 
 
+getDropdowns <- function(housekeeper, values){
+    vals <- values$markerMapping
+    names(vals) <- NULL
+    selectInput(paste0("Housekeeper_", housekeeper), 
+                label = housekeeper,
+                choices = as.list(names(values$markerMapping)),
+                selected = names(values$markerMapping)[values$markerMapping == housekeeper])
+}
+
+
+init_with_markers <- function(values){
+    
+    classifier <- readRDS(system.file("extdata", "Viability_classifier.RDS", package="cytoclops"))
+    housekeepers <- rownames(classifier$importance)
+    
+    #insert the housekeeping_selectors
+    insertUI(
+         selector = "#ViabilityClassifier",
+         where = "beforeBegin",
+         ui =   tags$div(h4('Confirm selected channels for cleanup'),
+                         tags$div(class = "doublecol",
+                         lapply(housekeepers,getDropdowns,values)))  
+    )
+    
+    #insert the gating and visne panel + additional buttons and inputs
+    insertUI(
+        selector = "#PolygonButton",
+        where = "beforeBegin",
+        ui =  tags$div(id='AboveGatingPanelInterface',
+                       fluidRow(
+                           column(6,
+                                  selectInput("Select_x_channels", 
+                                              label = "Select X channel",
+                                              choices = names(values$markerMapping),
+                                              selected = names(values$markerMapping[1]))
+                           ),
+                           column(6,
+                                  selectInput("Select_y_channels", 
+                                              label = "Select Y channel",
+                                              choices = names(values$markerMapping),
+                                              selected = names(values$markerMapping[2]))                         
+                           )
+                       )))
+    
+    shinyjs::show(id = "GatingPanel", anim = TRUE)
+    insertUI(
+        selector = "#GatingPanel",
+        where = "afterEnd",
+        ui =  tags$div(id='BelowGatingPanelInterface',
+                       actionButton("DeleteGateButton", "Delete Gate"),
+                       actionButton("GateButton", "Gate cells"),
+                       actionButton("RunTSNE", "Run TSNE")
+        )
+    )
+    #insert the markers into the marker panel
+    insertUI(
+        selector = "#CurrentPanelTab",
+        where = "afterEnd",
+        ui =  tags$div(id='MarkerPanelInterface',
+                       tags$div(class = "multicol",
+                                checkboxGroupInput("ArcSinhSelect", label = NULL, 
+                                                   choiceNames = as.list(names(values$markerMapping)),
+                                                   choiceValues = as.list(1:length(values$markerMapping)),
+                                                   selected = extractArcsinhTemp(values)))  
+        )
+    )
+    
+    
+}
+
+
 #figure out which position the flowframe had in the flowset
 get_filenames_from_flowSet <- function(set){
     fset_names <- NULL
@@ -72,7 +143,7 @@ instantiate_panels <- function(input, values, file, session){
     )    
     
     #add new UI elements
-    insertGatingPanels(values)
+    init_with_markers(values)
     replace_gating_list(input,values,session)
 }
 
@@ -187,7 +258,7 @@ loadGating <- function(input, values, file, session){
     }
     
     #add new UI elements
-    insertGatingPanels(values)
+    init_with_markers(values)
     replace_gating_list(input,values,session)
 }
 

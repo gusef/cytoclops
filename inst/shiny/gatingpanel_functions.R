@@ -10,52 +10,6 @@ GatingPanel <- setClass("GatingPanel",
                                   filename='character'))
 
 
-insertGatingPanels <- function(values){
-    shinyjs::show(id = "GatingPanel", anim = TRUE)
-    #insert the gating and visne panel + additional buttons and inputs
-    insertUI(
-        selector = "#PolygonButton",
-        where = "beforeBegin",
-        ui =  tags$div(id='AboveGatingPanelInterface',
-                       fluidRow(
-                           column(6,
-                                  selectInput("Select_x_channels", 
-                                              label = "Select X channel",
-                                              choices = names(values$markerMapping),
-                                              selected = names(values$markerMapping[1]))
-                           ),
-                           column(6,
-                                  selectInput("Select_y_channels", 
-                                              label = "Select Y channel",
-                                              choices = names(values$markerMapping),
-                                              selected = names(values$markerMapping[2]))                         
-                           )
-                       )))
-    insertUI(
-        selector = "#GatingPanel",
-        where = "afterEnd",
-        ui =  tags$div(id='BelowGatingPanelInterface',
-                       actionButton("DeleteGateButton", "Delete Gate"),
-                       actionButton("GateButton", "Gate cells"),
-                       actionButton("RunTSNE", "Run TSNE")
-        )
-    )
-    #insert the marker panel
-    if(!is.null(values$markerMapping)){
-        insertUI(
-            selector = "#CurrentPanelTab",
-            where = "afterEnd",
-            ui =  tags$div(id='MarkerPanelInterface',
-                           tags$div(class = "multicol",
-                                    checkboxGroupInput("ArcSinhSelect", label = NULL, 
-                                                       choiceNames = as.list(names(values$markerMapping)),
-                                                       choiceValues = as.list(1:length(values$markerMapping)),
-                                                       selected = extractArcsinhTemp(values)))  
-            )
-        )
-    }
-}
-
 
 #draw the actual polygon
 drawPolygon <- function(x, y, idx, cols){
@@ -85,12 +39,14 @@ draw_children <- function(input, values){
 plot_colorByDensity <- function(x1,x2,
                                 ylim=c(min(x2),max(x2)),
                                 xlim=c(min(x1),max(x1)),
-                                xlab="",ylab="",main="",cex=2) {
+                                xlab="",ylab="",main="",cex=2,
+                                downsample) {
     df <- data.frame(x1,x2)
     x <- densCols(x1,x2, colramp=colorRampPalette(c("black", "white")))
     df$dens <- col2rgb(x)[1,] + 1L
     cols <-  colorRampPalette(c("#000099", "#00FEFF", "#45FE4F","#FCFF00", "#FF9400", "#FF3100"))(256)
     df$col <- cols[df$dens]
+    df <- df[downsample,]
     plot(x2~x1, data=df[order(df$dens),], 
          ylim=ylim,xlim=xlim,pch=20,col=col,
          cex=cex,xlab=xlab,ylab=ylab,
@@ -124,11 +80,12 @@ plot_gates <- function(input, values){
         downsample <- !duplicated(df)
 
         if (input$PlotType=='density'){
-            plot_colorByDensity(df$x[downsample],
-                                df$y[downsample],
+            plot_colorByDensity(df$x,
+                                df$y,
                                 xlab=input$Select_x_channels,
                                 ylab=input$Select_y_channels,
-                                cex=input$graphics_cex)  
+                                cex=input$graphics_cex,
+                                downsample=downsample)  
         }else{
             #color all cells black
             if (is.null(values$current_child)){

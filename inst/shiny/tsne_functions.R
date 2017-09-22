@@ -35,11 +35,20 @@ plot_all_tsne_markers <- function(input, values){
         if (names(map)[idx] %in% arcsinh_transformed){
             vals <- asinh(vals/input$arcsinh_par)
         }
-        
+
         #map the values to the colors
         cols <- map2color(vals[values$gatingPanels[[values$currentID]]@tsne_sample],pal,limits=NULL)
-        plot(values$gatingPanels[[values$currentID]]@tsne$Y,
-             col=cols,
+        
+        #downsample the values
+        tsne_vals <- values$gatingPanels[[values$currentID]]@tsne$Y
+        
+        df <- data.frame(x = round(tsne_vals[,1], digits = input$plot_downsample),
+                         y = round(tsne_vals[,2], digits = input$plot_downsample))
+        downsample <- !duplicated(df)
+        
+        #plot the tnse
+        plot(tsne_vals[downsample,],
+             col=cols[downsample],
              xlab='tSNE1',
              ylab='tSNE2',
              pch=20,
@@ -169,8 +178,22 @@ plot_tsne_panel <- function(input, values){
         return(NULL)
     }
     
-    plot(values$gatingPanels[[values$currentID]]@tsne$Y,
-         col=values$tsne_col,
+    #downsample the values in the plot
+    tsne_vals <- values$gatingPanels[[values$currentID]]@tsne$Y
+    df <- data.frame(x = round(tsne_vals[,1], digits = input$plot_downsample),
+                     y = round(tsne_vals[,2], digits = input$plot_downsample))
+    downsample <- !duplicated(df)
+    
+    #fix the color (downsample)
+    if (length(values$tsne_col)>1){
+        cols <- values$tsne_col[downsample]
+    }else{
+        cols <- values$tsne_col
+    }
+    
+    #plot the tSNE
+    plot(tsne_vals[downsample,],
+         col=cols,
          xlab='tSNE1',
          ylab='tSNE2',
          pch=20,

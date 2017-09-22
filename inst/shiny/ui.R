@@ -1,9 +1,27 @@
- source('gating_tab_functions.R')
- source('input_tab_functions.R')
- source('gatingpanel_functions.R')
- source('misc.R')
- source('polygon.R')
- source('tsne_functions.R')
+require(Biobase)
+require(CIOShiny)
+require(data.table)
+require(DT)
+require(flowCore)
+require(flowVS)
+require(htmltools)
+require(jsonlite)
+require(Rtsne)
+require(shiny)
+require(shinyBS)
+require(shinyjs)
+require(shinythemes)
+require(sp)
+require(V8)
+require(matrixStats)
+
+source('gating_tab_functions.R')
+source('input_tab_functions.R')
+source('gatingpanel_functions.R')
+source('misc.R')
+source('polygon.R')
+source('tsne_functions.R')
+source('classifier_and_qc.r')
 
 ui <- navbarPage(theme = shinytheme("darkly"),
                  title = "Cytoclops",
@@ -18,7 +36,14 @@ ui <- navbarPage(theme = shinytheme("darkly"),
                           fileInput("rdsFile", "Choose .RDS file",
                                     accept = c(".rds",".RDS"))
                  ),
-                 tabPanel(title = "Cleanup and QC"
+                 tabPanel(title = "Cleanup and QC",
+                      tags$div(id='ViabilityClassifier',
+                        sliderInput('ViabilitySlider', 
+                                    'Sensitivity threshold', 
+                                    0.1, 0.9, 0.5, step = 0.1),
+                        actionButton('ViabilityButton',
+                                     'Run Viability Classifier',
+                                     icon = icon("leaf",lib = "glyphicon")))      
                  ),
                  tabPanel(title = "FlowSOM"
                  ),

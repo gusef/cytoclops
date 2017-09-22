@@ -172,7 +172,6 @@ gating_modal <- function(input, values, session) {
     }
 }
 
-
 press_gating_ok <- function(input, values, session) {
     #if in polygon mode get the selected from the polygon else from brush
     if (!is.null(values$scaled_points)) {
@@ -180,24 +179,45 @@ press_gating_ok <- function(input, values, session) {
     } else{
         selected <- values$selectedPoints$selected_
     }
+    
+    #add a new child to the gating panel
+    add_new_child(input, 
+                  values, 
+                  session,
+                  indices = values$gatingPanels[[values$currentID]]@indices[selected],
+                  name = input$newGateName)
+    
+    #remove the gating modal
+    removeModal()
+    #remove all tSNE related UI
+    removeUI(selector = "#ImposeColorSelector")
+    removeUI(selector = "#ShowAllMarkersButton")
+    shinyjs::hide(id = "tSNEPanel", anim = TRUE)
+    shinyjs::hide("SavetSNE")
+    #replace the old gating list on the side
+    replace_gating_list(input, values, session, selected = names(values$gatingPanels)[values$currentID])
+    
+}
+
+add_new_child <- function(input, values, session, 
+                          indices, name, 
+                          xmarker = input$Select_x_channels,
+                          ymarker = input$Select_y_channels){
+    
     #Add a new gatingPanel object
     newGating <- GatingPanel()
-    newGating@indices <-
-        values$gatingPanels[[values$currentID]]@indices[selected]
-    newGating@gate_name <- input$newGateName
-    newGating@filename <-
-        values$gatingPanels[[values$currentID]]@filename
+    newGating@indices <- indices
+    newGating@gate_name <- name
+    newGating@filename <- values$gatingPanels[[values$currentID]]@filename
     parent <- names(values$gatingPanels)[values$currentID]
     newGating@parent <- parent
-    
-    kid_name <- setNewChild(input, values, parent)
+    kid_name <- setNewChild(input, values, parent, name, xmarker, ymarker)
     
     #add the new element
     new_id <- values$currentID + 1
     if (new_id > length(values$gatingPanels)) {
         #if it is inserted at the end of the list
         values$gatingPanels <- c(values$gatingPanels, newGating)
-        
     } else{
         #if it is inserted in the middle of the list
         values$gatingPanels <- c(values$gatingPanels[1:(new_id - 1)],
@@ -207,23 +227,12 @@ press_gating_ok <- function(input, values, session) {
     names(values$gatingPanels)[new_id] <- kid_name
     #set the currentID to the new gate
     values$currentID <- new_id
-    #remove the gating modal
-    removeModal()
-    #remove all tSNE related UI
-    removeUI(selector = "#ImposeColorSelector")
-    removeUI(selector = "#ShowAllMarkersButton")
-    shinyjs::hide(id = "tSNEPanel", anim = TRUE)
-    shinyjs::hide("SavetSNE")
-    #replace the old gating list on the side
-    replace_gating_list(input, values, session, selected = names(values$gatingPanels)[new_id])
-    
 }
-
 
 #################################################################################
 #Children table function that allow to view, visualize, delete and edit gates
 
-setNewChild <- function(input, values, parent) {
+setNewChild <- function(input, values, parent, name, xmarker, ymarker) {
     #Derive child name and set it in children of the parent
     kids <- values$gatingPanels[[values$currentID]]@children
     index <- length(kids) + 1
@@ -240,10 +249,10 @@ setNewChild <- function(input, values, parent) {
     
     #capture all relevant information for the child
     child <- list()
-    child$name <- input$newGateName
+    child$name <- name
     child$id <- kid_name
-    child$xmarker <- input$Select_x_channels
-    child$ymarker <- input$Select_y_channels
+    child$xmarker <- xmarker
+    child$ymarker <- ymarker
     
     #get the points either from the polygon
     if (!is.null(values$scaled_points)) {
@@ -316,7 +325,7 @@ update_children_table <- function(session, input, values) {
                     num_child,
                     paste0('childshow', rand, '_'),
                     label = '',
-                    icon = icon("share-alt", lib = "glyphicon"),
+                    icon = icon("eye-open", lib = "glyphicon"),
                     onclick = 'Shiny.onInputChange(\"childShow\",  this.id)'
                 ),
                 Remove = shinyInput(
@@ -324,7 +333,7 @@ update_children_table <- function(session, input, values) {
                     num_child,
                     paste0('childremove', rand, '_'),
                     label = '',
-                    icon = icon("share-alt", lib = "glyphicon"),
+                    icon = icon("remove", lib = "glyphicon"),
                     onclick = 'Shiny.onInputChange(\"childRemove\",  this.id)'
                 ),
                 Edit = shinyInput(
@@ -332,7 +341,7 @@ update_children_table <- function(session, input, values) {
                     num_child,
                     paste0('childedit', rand, '_'),
                     label = '',
-                    icon = icon("share-alt", lib = "glyphicon"),
+                    icon = icon("pencil", lib = "glyphicon"),
                     onclick = 'Shiny.onInputChange(\"childEdit\",  this.id)'
                 ),
                 stringsAsFactors = FALSE,

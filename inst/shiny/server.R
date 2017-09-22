@@ -53,6 +53,15 @@ server <- function(input, output, session) {
         loadGating(input, values, input$rdsFile$datapath, session)
     })
     
+
+    #############################################################################
+    #Cleanup and QC panel
+    #############################################################################
+    
+    observeEvent(input$ViabilityButton, {
+        run_viability(input, values, session)
+    })
+    
     #############################################################################
     #Display of the Gating tree
     #############################################################################

@@ -17,6 +17,7 @@ Import: Biobase,
         flowVS,
         htmltools,
         jsonlite
+        matrixStats,
         Rtsne,
         shiny,
         shinyBS,

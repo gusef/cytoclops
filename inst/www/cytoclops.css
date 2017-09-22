@@ -45,6 +45,9 @@ table.dataTable tbody td {color: #000000;
 .multicol {-webkit-column-count: 3; /* Chrome, Safari, Opera */
            -moz-column-count: 3; /* Firefox */
            column-count: 3;}
+.doublecol {-webkit-column-count: 2; /* Chrome, Safari, Opera */
+           -moz-column-count: 2; /* Firefox */
+           column-count: 2;}
 .btn {
     padding-top: 5px;
     padding-bottom: 5px;
