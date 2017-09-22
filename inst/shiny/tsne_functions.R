@@ -69,7 +69,9 @@ add_tsne_controls <- function(input, values){
     insertUI(
         selector = "#SavetSNE",
         where = "beforeBegin",
-        ui = actionButton("ShowAllMarkersButton", "Show all"))
+        ui = fluidRow(
+                column(12,
+                   actionButton("ShowAllMarkersButton", "Show all"))))
     insertUI(
         selector = "#ShowAllMarkersButton",
         where = "beforeBegin",
@@ -106,6 +108,11 @@ show_tsne_modal <- function(input, values){
         checkboxInput("tsne_arcsin", 
                       label='Run t-SNE using arcsinh transformed values', 
                       value = TRUE),
+        numericInput(inputId = 'DownSample',
+                     value = 5000,
+                     max = 30000,
+                     min = 500,
+                     label = 'Size of sample'),
         tags$div(class = "multicol", 
             checkboxInput('all_none_tnseselect', 'All/None'),
             checkboxGroupInput("tSNEMarkers", label = NULL, 
@@ -113,7 +120,7 @@ show_tsne_modal <- function(input, values){
                                choiceValues = as.list(1:length(values$markerMapping)),
                                selected = extractTSNEMarkers(values))),
             
-        easyClose = TRUE,
+        easyClose = FALSE,
         footer = tagList(
             modalButton("Cancel"),
             actionButton("tsne_ok_button", "Run"))                
@@ -127,7 +134,13 @@ tsne_ok_button_pressed <- function(input, values){
     values$tsne_arcsintransform <- input$tsne_arcsin
     #remember which markers were selected
     values$tSNE_markers <- input$tSNEMarkers
+    downsample <- input$DownSample
     removeModal()
+    
+    #if there was no selection do not run tSNE
+    if (is.null(values$tSNE_markers)){
+        return(NULL)
+    }
     
     #get the values
     mat <- get_current_cells(values)
@@ -145,8 +158,8 @@ tsne_ok_button_pressed <- function(input, values){
     
     #downsampling
     set.seed(123) 
-    if (input$DownSample < nrow(mat)){
-        values$gatingPanels[[values$currentID]]@tsne_sample <- sample(1:nrow(mat), input$DownSample)
+    if (downsample < nrow(mat)){
+        values$gatingPanels[[values$currentID]]@tsne_sample <- sample(1:nrow(mat), downsample)
     }else{
         values$gatingPanels[[values$currentID]]@tsne_sample <- 1:nrow(mat)
     }

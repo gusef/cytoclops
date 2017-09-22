@@ -26,8 +26,8 @@ init_with_markers <- function(values){
     
     #insert the gating and visne panel + additional buttons and inputs
     insertUI(
-        selector = "#PolygonButton",
-        where = "beforeBegin",
+        selector = "#MarkerSelect",
+        where = "afterEnd",
         ui =  tags$div(id='AboveGatingPanelInterface',
                        fluidRow(
                            column(6,
